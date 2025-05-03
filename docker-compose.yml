@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:4.1-management  # includes web UI
+    ports:
+      - "5672:5672"       # AMQP protocol
+      - "15672:15672"     # Web UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+volumes:
+  rabbitmq-data:

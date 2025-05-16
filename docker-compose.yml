@@ -11,27 +11,29 @@ services:
       - resources-cleaner-messaging-broker-data:/var/lib/rabbitmq
     restart: unless-stopped
 
-  free-keys-db:
+  app-db:
+    image: mongodb/mongodb-community-server:6.0-ubi8
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - app-db-data:/data/db
+    restart: unless-stopped
+
+  keys-db:
     image: valkey/valkey:8.1.1
     ports:
       - "6379:6379"
     environment:
       VALKEY_EXTRA_FLAGS: "--appendonly yes --appendfsync everysec" # optimized for consistency, avoid duplicates
     volumes:
-      - free-keys-db-data:/data
+      - keys-db-data:/data
     restart: unless-stopped
 
-  taken-keys-db:
-    image: valkey/valkey:8.1.1
-    ports:
-      - "6380:6379"
-    environment:
-      VALKEY_EXTRA_FLAGS: "--save 300 1 --loglevel warning" # optimized for performance, all data isn't necessary
-    volumes:
-      - taken-keys-db-data:/data
-    restart: unless-stopped
 
 volumes:
   resources-cleaner-messaging-broker-data:
-  free-keys-db-data:
-  taken-keys-db-data:
+  app-db-data:
+  keys-db-data:

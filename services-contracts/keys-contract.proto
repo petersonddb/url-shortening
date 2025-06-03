@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "/keys";
+
+package keys;
+
+service Keys {
+  rpc GetKey (Void) returns (KeyResponse) {}
+  rpc ReleaseKey (KeyRequest) returns (Void) {}
+}
+
+message Void {}
+
+message KeyResponse {
+  bytes key = 1;
+}
+
+message KeyRequest {
+  bytes key = 1;
+}

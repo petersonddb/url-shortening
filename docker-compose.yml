@@ -23,13 +23,21 @@ services:
     restart: unless-stopped
 
   keys-db:
-    image: valkey/valkey:8.1.1
+    image: valkey/valkey:8.1.1 # for open-source Redis
     ports:
       - "6379:6379"
     environment:
       VALKEY_EXTRA_FLAGS: "--appendonly yes --appendfsync everysec" # optimized for consistency, avoid duplicates
     volumes:
       - keys-db-data:/data
+    restart: unless-stopped
+
+  keys-db-test:
+    image: valkey/valkey:8.1.1 # for open-source Redis
+    ports:
+      - "6380:6379"
+    environment:
+      VALKEY_EXTRA_FLAGS: "--save ''" # optimized for testing, data will always be flushed by tests
     restart: unless-stopped
 
 

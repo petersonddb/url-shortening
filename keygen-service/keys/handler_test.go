@@ -54,9 +54,9 @@ func TestHandler(t *testing.T) {
 	takenKeys := []string{}
 
 	for _, k := range availableKeys {
-		key, errs := NewKeyFromBytes([]byte(k))
-		if len(errs) != 0 {
-			t.Fatalf("invalid generated test keys: %v", errs)
+		key, err := NewKeyFromBytes([]byte(k))
+		if err != nil {
+			t.Fatalf("invalid generated test keys: %v", err)
 		}
 
 		if err := testApp.GetKeyValueDb().Keys.Create(key); err != nil {

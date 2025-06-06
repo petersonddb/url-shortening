@@ -41,7 +41,7 @@ var app App
 // an error asking for initialization
 func GetApp() (App, error) {
 	if app == nil {
-		return nil, errors.New("builtApp not initialized")
+		return nil, errors.New("app not initialized")
 	}
 
 	return app, nil

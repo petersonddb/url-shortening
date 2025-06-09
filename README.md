@@ -1,6 +1,6 @@
 # URL Shortening Service
 
-*Disclaimer: this service was created for learning purposes.*
+*Disclaimer: this service was created for self practicing.*
 
 ## The Service
 
@@ -17,18 +17,22 @@ The service should provide:
 ## Development
 
 This kind of service is read-heavy: lots more of redirections than new shortenings; 
-and, has almost no relationships among data; hence the decision for a NoSQL database and 
-multiple database servers mapped by some hashing function; 
-furthermore, a caching system will be in place to reduce database accesses.
+and, has almost no relationships among data; hence the decision for NoSQL databases and caching systems: a document-based database for important entities (users, short links, etc.) and a key-value database for sets of ahead-of-time generated keys (see below).
 
 Generating the short link by hashing the original URL brings more problems than solutions, 
 like not unique IDs or the need to crop the resulting hash to something smaller risking duplication; 
-therefore, we should use random-generated hashes, there will be a dedicated service to fulfil this task 
-mitigating main services overhead.
+therefore, random-generated hashes is a better option; a dedicated service 
+fulfils this task, mitigating main application overhead.
 
-Expired links are removed timely by a background job and user accesses.
+Expired links are removed timely by a background job and lazily on user access; access tentatives to expired links are notified to the cleaner job through a messaging broker.
 
 Number of new short links is limited per user; this prevents service abuse.
 
 A critical aspect here is availability; if the service goes off, all redirections (i.e. all short links) 
 would start to fail; it is therefore important to have replicas of the servers in place.
+
+### Progress
+
+- [x] Keys Generation Service
+- [ ] Expired Short Links Cleaner Service
+- [ ] Main Application

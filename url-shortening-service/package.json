@@ -1,35 +1,13 @@
 {
-  "name": "url-shortening-service",
-  "private": true,
-  "version": "0.0.0",
+  "name": "url-shortening",
+  "version": "0.1.0",
+  "description": "Create and redirect short links to longer URLs",
+  "author": "peterson.bem",
   "type": "module",
-  "scripts": {
-    "start-api": "node api.js",
-    "test": "jest",
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "jest": "^30.0.5",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
-  },
   "devDependencies": {
-    "@babel/preset-env": "^7.28.0",
-    "@eslint/js": "^9.30.1",
-    "@jest/globals": "^30.0.5",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
-    "babel-jest": "^30.0.5",
-    "eslint": "^9.30.1",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "globals": "^16.3.0",
-    "vite": "^7.0.4"
-  }
+    "lerna": "^8.2.3"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

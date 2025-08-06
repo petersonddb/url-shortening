@@ -1,9 +1,17 @@
 {
   "name": "url-shortening-pages",
   "description": "User interface pages for URL shortening service interaction.",
+  "author": "peterson.bem",
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/petersonddb/url-shortening.git"
+  },
+  "bugs": {
+    "url": "https://github.com/petersonddb/url-shortening/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

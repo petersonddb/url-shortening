@@ -38,7 +38,7 @@ describe("new user component", () => {
         const userServiceMock = vi.mocked(userService);
         const userServiceSpy = vi.spyOn(userServiceMock, "create");
 
-        vi.mocked(userService).create.mockResolvedValue({id: "test-id", name: "test-name", email: "test@email.com"});
+        userServiceMock.create.mockResolvedValue({id: "test-id", name: "test-name", email: "test@email.com"});
 
         await user.type(email, "name@email.com");
         await user.type(password, "my-pass")
@@ -59,14 +59,15 @@ describe("new user component", () => {
         const userServiceMock = vi.mocked(userService);
         const userServiceSpy = vi.spyOn(userServiceMock, "create");
 
-        const validationErrors = new ValidationErrors();
-        validationErrors.append({ field: "email", messages: ["invalid email"] });
-        validationErrors.append({ field: "password", messages: ["invalid password"] });
+        const validationErrors = new ValidationErrors([
+            { field: "email", messages: ["invalid email"] },
+            { field: "password", messages: ["invalid password"] }
+        ]);
 
-        vi.mocked(userService).create.mockRejectedValue(validationErrors);
+        userServiceMock.create.mockRejectedValue(validationErrors);
 
-        await user.type(email, "name@email.com");
-        await user.type(password, "my-pass")
+        await user.type(email, "anything@anything.com");
+        await user.type(password, "anything")
         await user.click(screen.getByRole("button"));
 
         expect(userServiceSpy).toHaveBeenCalled();

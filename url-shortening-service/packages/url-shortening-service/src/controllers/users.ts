@@ -1,5 +1,6 @@
 import {type Request, type Response} from "express";
 import {createUser, type User, UserValidationError} from "../users/users.js";
+import {serializeError, type SerializedError} from "./serializers.js";
 
 interface CreateRequest {
     data: {
@@ -27,17 +28,13 @@ export default {
                 return res.status(422).json(serializeUserValidationError(err));
             }
 
-            res.status(500).json(serializeError(err instanceof Error ? err : Error("unknown error")));
+            res.status(500).json(serializeError("user", err instanceof Error ? err : Error("unknown error")));
         })
     }
 }
 
 interface SerializedUser {
     data: Pick<User, "id" | "email" | "name">
-}
-
-interface SerializedError {
-    errors: { field: string; messages: string[] } [];
 }
 
 function serializeUser(user: User): SerializedUser {
@@ -48,8 +45,4 @@ function serializeUserValidationError(validationError: UserValidationError): Ser
     const validation = validationError.validation;
 
     return {errors: validation.failures.map((f) => ({field: f.field, messages: f.messages}))};
-}
-
-function serializeError(err: Error): SerializedError {
-    return {errors: [{field: "user", messages: [err.message]}]};
 }

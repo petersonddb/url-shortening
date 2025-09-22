@@ -1,7 +1,8 @@
 import {Box, Button, Container, TextField, Typography} from "@mui/material";
 import {type FormEvent, useState} from "react";
-import {useAuthService} from "./hooks.tsx";
 import {Message, type MessageContent} from "../messages/components.tsx";
+import {useService} from "../services/hooks.tsx";
+import {AuthServiceContext} from "./contexts.ts";
 
 /**
  * NewAuth authentication form for login
@@ -15,7 +16,7 @@ export const NewAuth = () => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
-    const authService = useAuthService();
+    const authService = useService(AuthServiceContext);
 
     const errorHandler = (err: Error) => {
         setMessage({kind: "error", node: err.message});

@@ -1,5 +1,4 @@
 import {type FormEvent, useState} from "react";
-import {useUserService} from "./hooks.ts";
 import {
     Box,
     Button,
@@ -10,6 +9,8 @@ import {
 import {type User} from "./users.ts";
 import {type MessageContent, Message} from "../messages/components.tsx"
 import {ValidationErrors} from "../errors/errors.ts";
+import {useService} from "../services/hooks.tsx";
+import {UserServiceContext} from "./contexts.ts";
 
 /**
  * NewUser sign-up form
@@ -23,7 +24,7 @@ export const NewUser = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const userService = useUserService();
+    const userService = useService(UserServiceContext);
 
     const errorHandler = (err: Error) => {
         setMessage({kind: "error", node: err.message});

@@ -57,7 +57,7 @@ describe("users API", () => {
                         messages: [expect.stringMatching(/at least 8 characters/)]
                     }
                 ])
-            )
+            );
         });
     });
 });

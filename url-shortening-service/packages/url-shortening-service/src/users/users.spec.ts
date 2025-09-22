@@ -1,5 +1,6 @@
 import {it, expect, describe, vi, beforeEach} from "vitest";
-import {createUser, type User, type UserService, UserValidationError, validateUserAll} from "./users.js";
+import {createUser, type User, type UserService, validateUserAll} from "./users.js";
+import {ValidationError} from "../errors/validations.js";
 
 describe("create user use case", () => {
     it("should create a valid user", async () => {
@@ -25,7 +26,7 @@ describe("create user use case", () => {
         const create = () =>
             createUser({email: "invalid", password: "invalid"}, userService);
 
-        await expect(create).rejects.toThrow(UserValidationError);
+        await expect(create).rejects.toThrow(ValidationError);
         await expect(create).rejects.toThrow(/validation failed/);
 
         // TODO: test which validations are being applied

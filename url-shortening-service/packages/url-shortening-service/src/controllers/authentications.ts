@@ -10,7 +10,9 @@ export default {
 
         const auth = req.headers.authorization;
         if (!auth) {
-            return res.status(400).json(serializeError("authentication", Error("invalid request, should have basic authorization")));
+            res.status(400).json(serializeError("authentication", Error("invalid request, should have basic authorization")));
+
+            return;
         }
 
         let email, password;
@@ -21,11 +23,15 @@ export default {
                 .trim()
                 .split(':');
         } catch {
-            return res.status(400).json(serializeError("authentication", Error("invalid request, should have basic authorization")));
+            res.status(400).json(serializeError("authentication", Error("invalid request, should have basic authorization")));
+
+            return;
         }
 
-        if(!(email && password)) {
-            return res.status(400).json(serializeError("authentication", Error("invalid request, should have basic authorization")));
+        if (!(email && password)) {
+            res.status(400).json(serializeError("authentication", Error("invalid request, should have basic authorization")));
+
+            return;
         }
 
         authenticate({email, password}, req.authenticableService).then((authToken) => {

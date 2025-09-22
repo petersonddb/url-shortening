@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import {type Validation, ValidationError} from "../errors/validations.js";
 
 export interface User {
     id?: string;
@@ -19,14 +20,6 @@ const EmailFormat = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PasswordMinLength = 8;
 const PasswordFormats = [/[a-z]+/, /[A-Z]/, /[0-9]+/, /[!@#$%&*.,_=+]+/];
 
-export interface UserValidation {
-    valid: boolean;
-    failures: {
-        field: string;
-        messages: string[];
-    }[];
-}
-
 const validations = [
     validateUserEmail,
     validateUserPassword,
@@ -37,7 +30,7 @@ const validations = [
  * @param user to be validated
  * @returns validation results
  */
-export function validateUserAll(user: User): UserValidation {
+export function validateUserAll(user: User): Validation {
     const failures = validations
         .map((validation) => validation(user).failures)
         .filter((v) => v.length > 0)
@@ -46,7 +39,7 @@ export function validateUserAll(user: User): UserValidation {
     return {valid: failures.length === 0, failures};
 }
 
-export function validateUserEmail(user: User): UserValidation {
+export function validateUserEmail(user: User): Validation {
     const email = user.email;
     let failure: { field: string, messages: string[] } | undefined;
 
@@ -64,7 +57,7 @@ export function validateUserEmail(user: User): UserValidation {
     return {valid: failure == null, failures: failure != null ? [failure] : []};
 }
 
-export function validateUserPassword(user: User): UserValidation {
+export function validateUserPassword(user: User): Validation {
     const password = user.password;
     let failure: { field: string, messages: string[] } | undefined;
 
@@ -84,16 +77,6 @@ export function validateUserPassword(user: User): UserValidation {
     return {valid: failure == null, failures: failure != null ? [failure] : []};
 }
 
-
-export class UserValidationError extends Error {
-    validation: UserValidation;
-
-    constructor(validation: UserValidation) {
-        super("user validation failed");
-
-        this.validation = validation;
-    }
-}
 
 export interface CreateUserParams {
     email: string;
@@ -116,7 +99,7 @@ export async function createUser({email, password}: CreateUserParams, userServic
 
     const validation = validateUserAll(user);
     if (!validation.valid) {
-        throw new UserValidationError(validation);
+        throw new ValidationError(validation);
     }
 
     // hash the password

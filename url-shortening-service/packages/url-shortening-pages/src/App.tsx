@@ -9,20 +9,34 @@ import type {AuthService} from "./authentications/authentications.ts";
 import {AuthServiceContext} from "./authentications/contexts.ts";
 import {BrowserRouter, Route, Routes} from "react-router";
 import {NewAuth} from "./authentications/components.tsx";
+import {Home} from "./home/components.tsx";
+import type {ShortService} from "./shorts/shorts.ts";
+import {ShortServiceContext} from "./shorts/contexts.tsx";
+import {ApiShortService} from "./api/shorts.ts";
 
-const API_BASE_URL: string = import.meta.env.VITE_API_URL as string;
+const ApiBaseUrl: string = import.meta.env.VITE_API_URL as string;
+const SettingsRequestUrl: string = import.meta.env.VITE_SETTINGS_REQUEST_URL as string;
 
 function App() {
-    const [userService] = useState<UserService>(new ApiUserService(API_BASE_URL));
-    const [authService] = useState<AuthService>(new ApiAuthService(API_BASE_URL));
+    const [userService] = useState<UserService>(new ApiUserService(ApiBaseUrl));
+    const [authService] = useState<AuthService>(new ApiAuthService(ApiBaseUrl));
+    const [shortService] = useState<ShortService>(new ApiShortService(ApiBaseUrl));
 
     return (
         <UserServiceContext value={userService}>
             <AuthServiceContext value={authService}>
                 <BrowserRouter>
                     <Routes>
-                        <Route path="/signup" element={<NewUser/>}></Route>
-                        <Route path="/login" element={<NewAuth/>}></Route>
+                        <Route path="/signup" element={<NewUser/>}/>
+                        <Route path="/login" element={<NewAuth/>}/>
+
+                        <Route
+                            path="/home/*"
+                            element={
+                                <ShortServiceContext value={shortService}>
+                                    <Home settingsRequestUrl={SettingsRequestUrl}/>
+                                </ShortServiceContext>
+                            }/>
                     </Routes>
                 </BrowserRouter>
             </AuthServiceContext>

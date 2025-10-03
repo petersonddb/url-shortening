@@ -1,7 +1,7 @@
 // package: keys
 // file: keys-contract.proto
 
-/* tslint:disable */
+// /* tslint:disable */
 /* eslint-disable */
 
 import * as grpc from "@grpc/grpc-js";

@@ -496,4 +496,5 @@ proto.keys.KeyRequest.prototype.setKey = function (value) {
 };
 
 
-goog.object.extend(exports, proto.keys);
+// goog.object.extend(exports, proto.keys);
+export const { Void, KeyRequest, KeyResponse } = proto.keys;

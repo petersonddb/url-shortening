@@ -5,8 +5,9 @@ import {Collection, Db, type MongoClient} from "mongodb";
 
 describe("mongodb shorts service", () => {
     const mockInsertOne = vi.fn();
+    const mockFind = vi.fn();
 
-    const mockCollection: Partial<Collection> = {insertOne: mockInsertOne};
+    const mockCollection: Partial<Collection> = {insertOne: mockInsertOne, find: mockFind};
     const mockDb: Partial<Db> = {collection: vi.fn().mockReturnValue(mockCollection)};
     const mockClient: Partial<MongoClient> = {db: vi.fn().mockReturnValue(mockDb)};
 
@@ -39,6 +40,48 @@ describe("mongodb shorts service", () => {
                 await expect(create).rejects.toThrow(/failed to store new short.*mocked insertOne/i);
                 expect(mockDb.collection).toHaveBeenCalledWith("shorts");
                 expect(mockInsertOne).toHaveBeenCalledWith(short);
+            });
+        });
+    });
+
+    describe("list shorts", () => {
+        const list = () => service.list();
+
+        describe("when mongodb successfully return all shorts", () => {
+            const mockShorts = [
+                {hash: "111111", originalUrl: "https://test.com/long-1", expire: new Date()},
+                {hash: "222222", originalUrl: "https://test.com/long-2", expire: new Date()},
+            ];
+
+            beforeEach(() => {
+                mockFind.mockReturnValue({
+                    toArray: vi.fn(() => Promise.resolve(mockShorts))
+                });
+            });
+
+            it("should return the list of shorts", async () => {
+                const gotShorts = await list();
+
+                const shorts: Short[] = mockShorts.map((short): Short => (
+                    {...short, originalUrl: new URL(short.originalUrl)}));
+
+                expect(gotShorts).toEqual(shorts);
+                expect(mockDb.collection).toHaveBeenCalledWith("shorts");
+                expect(mockFind).toHaveBeenCalled();
+            });
+        })
+
+        describe("when mongodb fails to return shorts", () => {
+            beforeEach(() => {
+                mockFind.mockReturnValue({
+                    toArray: vi.fn(() => Promise.reject(new Error("mocked find")))
+                });
+            });
+
+            it("should throw an error", async () => {
+                await expect(list()).rejects.toThrow(/failed to get shorts.*mocked find/i);
+                expect(mockDb.collection).toHaveBeenCalledWith("shorts");
+                expect(mockFind).toHaveBeenCalled();
             });
         });
     });

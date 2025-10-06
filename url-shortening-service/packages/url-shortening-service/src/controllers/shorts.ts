@@ -42,6 +42,18 @@ export default {
         }).catch((err: unknown) => {
             res.status(500).json(serializeError("short", err instanceof Error ? err : new Error("failed to create short link")));
         });
+    },
+
+    list: (req: Request, res: Response) => {
+        if (!req.shortService) {
+            throw new Error("failed to handle request: service not available");
+        }
+
+        req.shortService.list().then((shorts) => {
+            res.json(serializeShorts(shorts));
+        }).catch((err: unknown) => {
+            res.status(500).json(serializeError("short", err instanceof Error ? err : new Error("failed to list short links")));
+        });
     }
 };
 
@@ -53,6 +65,14 @@ interface SerializedShort {
     }
 }
 
+interface SerializedShorts {
+    data: {
+        hash: string;
+        originalUrl: string;
+        expire: string;
+    }[]
+}
+
 function serializeShort(short: Short): SerializedShort {
     return {
         data: {
@@ -61,4 +81,8 @@ function serializeShort(short: Short): SerializedShort {
             expire: short.expire?.toISOString() ?? ""
         }
     };
+}
+
+function serializeShorts(shorts: Short[]): SerializedShorts {
+    return { data: shorts.map(short => serializeShort(short).data ) }
 }

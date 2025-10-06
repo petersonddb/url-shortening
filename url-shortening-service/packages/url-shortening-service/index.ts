@@ -73,6 +73,7 @@ process.on("SIGINT", () => {
 app.post("/api/users", users.create);
 app.post("/api/authentications", authentications.create);
 app.post("/api/shorts", shorts.create);
+app.get("/api/shorts", shorts.list);
 
 app.listen(port, () => {
     console.info(`listening on port ${port.toString()}`);

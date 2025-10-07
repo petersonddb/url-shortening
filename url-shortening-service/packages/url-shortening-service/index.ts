@@ -14,6 +14,7 @@ import grpc from "@grpc/grpc-js";
 import {KeygenKeyService} from "./src/keygen-service/keys.js";
 import type {KeyService} from "./src/keys/keys.js";
 import {KeysClient} from "./src/keygen-service/keys-contract_grpc_pb.js";
+import redirectShortLink from "./src/controllers/redirections.js";
 
 export const app = express();
 const port = parseInt(process.env.PORT ?? '3000');
@@ -74,6 +75,9 @@ app.post("/api/users", users.create);
 app.post("/api/authentications", authentications.create);
 app.post("/api/shorts", shorts.create);
 app.get("/api/shorts", shorts.list);
+
+// Redirections route
+app.get("/r/:hash", redirectShortLink);
 
 app.listen(port, () => {
     console.info(`listening on port ${port.toString()}`);

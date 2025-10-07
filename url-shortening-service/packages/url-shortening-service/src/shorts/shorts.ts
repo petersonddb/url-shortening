@@ -10,12 +10,27 @@ export interface Short {
 }
 
 /**
+ * isShortExpired determines whether a short link
+ * is expired or not
+ * @param short to verify
+ */
+export function isShortExpired(short: Short): boolean {
+    if (short.expire == null) {
+        return true;
+    }
+
+    return short.expire <= new Date();
+}
+
+/**
  * ShortService for short links storage access
  */
 export interface ShortService {
     create(short: Short): Promise<Short>;
 
     list(): Promise<Short[]>;
+
+    findByHash(hash: string): Promise<Short | null>;
 }
 
 

@@ -58,4 +58,27 @@ export class MongoDbShortService implements ShortService {
             } : mongoDbShort as Omit<MongodbShort, "originalUrl">
         ));
     }
+
+    async findByHash(hash: string): Promise<Short | null> {
+        console.log(`looking for a short link for hash ${hash} in mongodb`);
+
+        let short: MongodbShort | null;
+        try {
+            short = await this.client
+                .db(process.env.MONGODB_DB)
+                .collection<MongodbShort>("shorts")
+                .findOne({ hash: hash });
+        } catch (err: unknown) {
+            throw Error(`failed to find short: ${err instanceof Error ? err : "unknown error"}`);
+        }
+
+        if(short == null) {
+            return null;
+        }
+
+        return short.originalUrl ? {
+            ...short,
+            originalUrl: new URL(short.originalUrl)
+        } : short as Omit<Short, "originalUrl">;
+    }
 }

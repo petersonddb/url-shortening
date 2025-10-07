@@ -6,8 +6,9 @@ import {Collection, Db, type MongoClient} from "mongodb";
 describe("mongodb shorts service", () => {
     const mockInsertOne = vi.fn();
     const mockFind = vi.fn();
+    const mockFindOne = vi.fn();
 
-    const mockCollection: Partial<Collection> = {insertOne: mockInsertOne, find: mockFind};
+    const mockCollection: Partial<Collection> = {insertOne: mockInsertOne, find: mockFind, findOne: mockFindOne};
     const mockDb: Partial<Db> = {collection: vi.fn().mockReturnValue(mockCollection)};
     const mockClient: Partial<MongoClient> = {db: vi.fn().mockReturnValue(mockDb)};
 
@@ -82,6 +83,52 @@ describe("mongodb shorts service", () => {
                 await expect(list()).rejects.toThrow(/failed to get shorts.*mocked find/i);
                 expect(mockDb.collection).toHaveBeenCalledWith("shorts");
                 expect(mockFind).toHaveBeenCalled();
+            });
+        });
+    });
+
+    describe("find by hash", () => {
+        const findByHash = () => service.findByHash("111111");
+
+        describe("when mongodb successfully return a short", () => {
+            const short: Short = {hash: "111111"};
+
+            beforeEach(() => {
+                mockFindOne.mockResolvedValue(short);
+            });
+
+            it("should return the found short", async () => {
+                const gotShort = await findByHash();
+
+                expect(gotShort).toEqual(short);
+                expect(mockDb.collection).toHaveBeenCalledWith("shorts");
+                expect(mockFindOne).toHaveBeenCalledWith({hash: short.hash});
+            });
+        });
+
+        describe("when mongodb returns NO short", () => {
+            beforeEach(() => {
+                mockFindOne.mockResolvedValue(null);
+            });
+
+            it("should return nothing", async () => {
+                const gotShort = await findByHash();
+
+                expect(gotShort).toBeNull();
+                expect(mockDb.collection).toHaveBeenCalledWith("shorts");
+                expect(mockFindOne).toHaveBeenCalled();
+            });
+        });
+
+        describe("when mongodb fails", () => {
+            beforeEach(() => {
+                mockFindOne.mockRejectedValue(Error("mocked find one"));
+            });
+
+            it("should throw an error", async () => {
+                await expect(findByHash()).rejects.toThrow(/failed to find.*mocked find one/i);
+                expect(mockDb.collection).toHaveBeenCalledWith("shorts");
+                expect(mockFindOne).toHaveBeenCalled();
             });
         });
     });

@@ -23,6 +23,20 @@ export function isShortExpired(short: Short): boolean {
 }
 
 /**
+ * getLink based on given short and base url
+ * @param short including a hash to construct the link
+ * @param baseUrl including the path to construct the link
+ * @return a link formed from the base url and existent short hash, null otherwise
+ */
+export function getLink(short: Short, baseUrl: string): URL | null {
+    if (!short.hash) {
+        return null;
+    }
+
+    return new URL(`${baseUrl}/${short.hash}`);
+}
+
+/**
  * ShortService for short links storage access
  */
 export interface ShortService {

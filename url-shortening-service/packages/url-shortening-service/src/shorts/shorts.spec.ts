@@ -1,6 +1,6 @@
 import {beforeEach, describe, expect, it, vi} from "vitest";
 import type {KeyService} from "../keys/keys.js";
-import {createShort, isShortExpired, type Short, type ShortService} from "./shorts.js";
+import {createShort, getLink, isShortExpired, type Short, type ShortService} from "./shorts.js";
 
 describe("create short use case", () => {
     const originalUrl = new URL("https://test.com/long-url?title=long");
@@ -107,6 +107,49 @@ describe("determine short link is expired", () => {
 
         it("should be expired", () => {
             expect(check()).toBeTruthy();
+        });
+    });
+});
+
+describe("get link from a base url", () => {
+    let short: Short = {};
+    let baseUrl = "";
+
+    const run = () => getLink(short, baseUrl);
+
+    describe("given a valid base url", () => {
+        beforeEach(() => {
+            short = {hash: "any-hash"};
+            baseUrl = "https://test.com/redirect";
+        });
+
+        it("should return the link", () => {
+            const link = run();
+
+            expect(link).toEqual(new URL("https://test.com/redirect/any-hash"));
+        });
+    });
+
+    describe("given a short with NO hash", () => {
+        beforeEach(() => {
+            short = {};
+        });
+
+        it("should return nothing", () => {
+            const link = run();
+
+            expect(link).toBeNull();
+        });
+    });
+
+    describe("given an invalid base url", () => {
+        beforeEach(() => {
+            short = {hash: "any-hash"};
+            baseUrl = "";
+        })
+
+        it("should fail", () => {
+            expect(run).toThrow(TypeError);
         });
     });
 });

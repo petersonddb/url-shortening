@@ -33,7 +33,7 @@ describe("shorts API", () => {
                 expect(res.statusCode).toEqual(201);
                 expect(res.headers["content-type"]).toMatch(/json/i);
                 expect(body).toHaveProperty("data");
-                expect(Object.keys(body.data)).toEqual(["hash", "originalUrl", "expire"]);
+                expect(Object.keys(body.data)).toEqual(["hash", "link", "originalUrl", "expire"]);
                 expect(body.data.hash).toBeTruthy();
             });
         });
@@ -125,7 +125,7 @@ describe("shorts API", () => {
                 expect(res.headers["content-type"]).toMatch(/json/i);
                 expect(body.data).toBeTruthy();
                 expect(body.data.length).toBeGreaterThanOrEqual(5);
-                expect(Object.keys(body.data[0] ?? {})).toEqual(["hash", "originalUrl", "expire"]);
+                expect(Object.keys(body.data[0] ?? {})).toEqual(["hash", "link", "originalUrl", "expire"]);
             });
         });
     });

@@ -1,7 +1,7 @@
 import {type Request, type Response} from "express";
 import {serializeError, serializeValidationError} from "./serializers.js";
 import {ValidationError} from "../errors/validations.js";
-import {createShort, type Short} from "../shorts/shorts.js";
+import {createShort, getLink, type Short} from "../shorts/shorts.js";
 
 interface CreateRequest {
     data: {
@@ -38,7 +38,7 @@ export default {
         }
 
         createShort({originalUrl}, req.keyService, req.shortService).then((short) => {
-            res.status(201).json(serializeShort(short));
+            res.status(201).json(serializeShort(short, req.baseRedirectionUrl));
         }).catch((err: unknown) => {
             res.status(500).json(serializeError("short", err instanceof Error ? err : new Error("failed to create short link")));
         });
@@ -50,7 +50,7 @@ export default {
         }
 
         req.shortService.list().then((shorts) => {
-            res.json(serializeShorts(shorts));
+            res.json(serializeShorts(shorts, req.baseRedirectionUrl));
         }).catch((err: unknown) => {
             res.status(500).json(serializeError("short", err instanceof Error ? err : new Error("failed to list short links")));
         });
@@ -60,6 +60,7 @@ export default {
 interface SerializedShort {
     data: {
         hash: string;
+        link: string;
         originalUrl: string;
         expire: string;
     }
@@ -68,21 +69,23 @@ interface SerializedShort {
 interface SerializedShorts {
     data: {
         hash: string;
+        link: string;
         originalUrl: string;
         expire: string;
     }[]
 }
 
-function serializeShort(short: Short): SerializedShort {
+function serializeShort(short: Short, withBaseRedirectionUrl = ""): SerializedShort {
     return {
         data: {
             hash: short.hash ?? "",
+            link: withBaseRedirectionUrl ? getLink(short, withBaseRedirectionUrl)?.toString() ?? "" : "",
             originalUrl: short.originalUrl?.toString() ?? "",
             expire: short.expire?.toISOString() ?? ""
         }
     };
 }
 
-function serializeShorts(shorts: Short[]): SerializedShorts {
-    return { data: shorts.map(short => serializeShort(short).data ) }
+function serializeShorts(shorts: Short[], withBaseRedirectionUrl = ""): SerializedShorts {
+    return {data: shorts.map(short => serializeShort(short, withBaseRedirectionUrl).data)};
 }

@@ -35,6 +35,8 @@ declare module "express-serve-static-core" {
         authenticableService?: AuthenticableService;
         shortService?: ShortService;
         keyService?: KeyService;
+
+        baseRedirectionUrl?: string;
     }
 }
 
@@ -53,11 +55,18 @@ if (!process.env.KEYGEN_SERVICE_URL) {
 const keysClient = new KeysClient(process.env.KEYGEN_SERVICE_URL, grpc.credentials.createInsecure());
 const keyService = new KeygenKeyService(keysClient);
 
+if (!process.env.BASE_REDIRECTION_URL) {
+    throw new Error("could not configure redirections: base redirection url is missing");
+}
+
+const baseRedirectionUrl = process.env.BASE_REDIRECTION_URL;
+
 app.use((req, _res, next) => {
     req.userService = userAuthService;
     req.authenticableService = userAuthService;
     req.shortService = shortService;
     req.keyService = keyService;
+    req.baseRedirectionUrl = baseRedirectionUrl;
 
     next();
 });

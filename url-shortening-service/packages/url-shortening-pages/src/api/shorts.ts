@@ -10,6 +10,7 @@ type RequestMessage = {
 type CreateResponseMessage = {
     data: {
         hash: string;
+        link: string;
         originalUrl: string;
         expire: string;
     }
@@ -18,6 +19,7 @@ type CreateResponseMessage = {
 type ListResponseMessage = {
     data: {
         hash: string;
+        link: string;
         originalUrl: string;
         expire: string;
     }[];
@@ -69,6 +71,7 @@ export class ApiShortService implements ShortService {
             if (data) {
                 return {
                     hash: data.hash,
+                    link: new URL(data.link),
                     originalUrl: new URL(data.originalUrl),
                     expire: new Date(data.expire),
                 } as Short;
@@ -111,6 +114,7 @@ export class ApiShortService implements ShortService {
                 return data.map(short => (
                     {
                         hash: short.hash,
+                        link: new URL(short.link),
                         originalUrl: new URL(short.originalUrl),
                         expire: new Date(short.expire),
                     } as Short

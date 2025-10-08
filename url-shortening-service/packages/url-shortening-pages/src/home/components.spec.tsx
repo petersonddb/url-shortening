@@ -62,8 +62,18 @@ describe("home component", () => {
 
         describe("given some existent shorts", () => {
             const shorts: Short[] = [
-                {hash: "abc123", originalUrl: new URL("https://test.com/long-path"), expire: new Date()},
-                {hash: "def456", originalUrl: new URL("https://example.com/long-path"), expire: new Date()},
+                {
+                    hash: "abc123",
+                    link: new URL("https://short.link/abc123"),
+                    originalUrl: new URL("https://test.com/long-path"),
+                    expire: new Date()
+                },
+                {
+                    hash: "def456",
+                    link: new URL("https://short.link/def456"),
+                    originalUrl: new URL("https://example.com/long-path"),
+                    expire: new Date()
+                },
             ];
 
             beforeEach(() => {
@@ -77,20 +87,27 @@ describe("home component", () => {
                     const table = await screen.findByRole("table");
 
                     expect(table).toBeInTheDocument();
-                    expect(await within(table).findByRole("row", {name: new RegExp(short.hash)})).toBeInTheDocument();
+                    expect(await within(table).findByRole("row", {name: new RegExp(short.link.toString())}))
+                        .toBeInTheDocument();
                 });
             }
 
             describe("when creating a new short with success", () => {
                 const originalUrl = new URL("http://localhost:3000/long_path?title=long");
-                const newShort =  {hash: "new123", originalUrl, expire: Date()};
+
+                const newShort = {
+                    hash: "new123",
+                    link: new URL("http://short.ling/new123"),
+                    originalUrl,
+                    expire: Date()
+                };
 
                 const submit = async () => {
                     renderHome();
 
                     const input = await screen.findByRole("textbox", {name: "Long URL"});
 
-                    list.mockResolvedValue([...shorts, {hash: "new123", originalUrl, expire: Date()}]);
+                    list.mockResolvedValue([...shorts, newShort]);
                     await user.type(input, originalUrl.toString());
                     await user.click(await screen.findByRole("button"));
                 };
@@ -105,7 +122,8 @@ describe("home component", () => {
                     expect(create).toHaveBeenCalledWith({originalUrl});
                     expect(await screen.findByText(/short link generated/i)).toBeInTheDocument();
                     expect(list).toHaveBeenCalled();
-                    expect(await screen.findByRole("row", {name: new RegExp(newShort.hash)})).toBeInTheDocument();
+                    expect(await screen.findByRole("row", {name: new RegExp(newShort.link.toString())}))
+                        .toBeInTheDocument();
                 });
             });
 
@@ -184,7 +202,8 @@ describe("home component", () => {
                     it("should try to load the shorts again", async () => {
                         await tryAgain();
 
-                        expect(await screen.findByRole("row", {name: new RegExp(shorts[0].hash)})).toBeInTheDocument();
+                        expect(await screen.findByRole("row", {name: new RegExp(shorts[0].link.toString())}))
+                            .toBeInTheDocument();
                     });
                 });
             });

@@ -9,6 +9,7 @@ import {
     TableBody,
     Box,
     AppBar,
+    Link,
     Typography, Divider, Container, TextField, IconButton, Button, Skeleton
 } from "@mui/material";
 import LinkIcon from '@mui/icons-material/Link';
@@ -17,7 +18,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AddIcon from '@mui/icons-material/Add';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import {Link} from "react-router";
+import { Link as RouterLink } from "react-router";
 import {useRouteMatch} from "./hooks.tsx";
 import {type FormEvent, type ReactNode, useEffect, useState} from "react";
 import {useService} from "../services/hooks.tsx";
@@ -63,7 +64,7 @@ const Header = ({currentTab}: HeaderProps) => {
             <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
                 <Typography variant="h6">user.name / home</Typography>
 
-                <Link to="#"><LogoutIcon/></Link>
+                <Link href="#"><LogoutIcon/></Link>
             </Box>
 
             <Tabs value={currentTab} textColor="inherit" aria-label="home screen views">
@@ -73,7 +74,7 @@ const Header = ({currentTab}: HeaderProps) => {
                      label="Shorts"
                      value="/home"
                      to="/home"
-                     component={Link}
+                     component={RouterLink}
                      aria-controls="shorts-view"/>
 
                 <Tab id="settings-view-tab"
@@ -82,7 +83,7 @@ const Header = ({currentTab}: HeaderProps) => {
                      label="Settings"
                      value="/home/settings"
                      to="/home/settings"
-                     component={Link}
+                     component={RouterLink}
                      aria-controls="settings-view"/>
             </Tabs>
         </AppBar>
@@ -210,7 +211,7 @@ const ShortsList = ({loading, error, items, onRetry}: ShortListProps) => {
                     {items.map((short) => (
                         <TableRow key={short.hash}>
                             <TableCell>{short.originalUrl.toString()}</TableCell>
-                            <TableCell>{short.hash}</TableCell>
+                            <TableCell><Link href={short.link.toString()} target="_blank">{short.link.toString()}</Link></TableCell>
                             <TableCell>{short.expire.toLocaleString()}</TableCell>
                             <TableCell>-</TableCell>
                         </TableRow>
@@ -330,7 +331,7 @@ const Settings = ({settingsRequestUrl}: SettingsProps) => {
 
             <Box sx={{m: 2, p: 2, textAlign: "center", border: "1px solid lightgrey", borderRadius: 2}}>
                 <Typography variant="body1">
-                    open an issue into <Link to={settingsRequestUrl} target="_blank">our ticketing system</Link>
+                    open an issue into <Link href={settingsRequestUrl} target="_blank">our ticketing system</Link>
                 </Typography>
             </Box>
         </Box>

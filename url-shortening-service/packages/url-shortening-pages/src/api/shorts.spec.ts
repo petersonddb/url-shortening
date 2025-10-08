@@ -31,6 +31,7 @@ describe("api short service", () => {
         describe("when the server respond successfully", () => {
             const createdShort = {
                 hash: "abc123",
+                link: new URL("https://short.link/abc123"),
                 originalUrl: new URL(originalUrl),
                 expire: new Date()
             } as Short;
@@ -40,6 +41,7 @@ describe("api short service", () => {
                     return HttpResponse.json({
                         data: {
                             hash: createdShort.hash,
+                            link: createdShort.link.toString(),
                             originalUrl: createdShort.originalUrl.toString(),
                             expire: createdShort.expire.toISOString()
                         }
@@ -150,14 +152,17 @@ describe("api short service", () => {
                         data: [
                             {
                                 hash: "111111",
+                                link: (new URL("https://short.link/111111")).toString(),
                                 originalUrl: (new URL("http://test.com/long-1")).toString(),
                                 expire: (new Date()).toISOString()
                             }, {
                                 hash: "222222",
+                                link: (new URL("https://short.link/222222")).toString(),
                                 originalUrl: (new URL("http://test.com/long-2")).toString(),
                                 expire: (new Date()).toISOString()
                             }, {
                                 hash: "333333",
+                                link: (new URL("https://short.link/333333")).toString(),
                                 originalUrl: (new URL("http://test.com/long-3")).toString(),
                                 expire: (new Date()).toISOString()
                             },

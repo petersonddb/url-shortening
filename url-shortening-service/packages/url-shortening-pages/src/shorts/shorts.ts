@@ -3,6 +3,7 @@
  */
 export type Short = {
     hash: string;
+    link: URL;
     originalUrl: URL;
     expire: Date;
 }

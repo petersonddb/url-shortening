@@ -3,6 +3,7 @@ import {type FormEvent, useState} from "react";
 import {Message, type MessageContent} from "../messages/components.tsx";
 import {useService} from "../services/hooks.tsx";
 import {AuthServiceContext} from "./contexts.ts";
+import {useNavigate} from "react-router";
 
 /**
  * NewAuth authentication form for login
@@ -16,6 +17,8 @@ export const NewAuth = () => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
+    const navigate = useNavigate();
+
     const authService = useService(AuthServiceContext);
 
     const errorHandler = (err: Error) => {
@@ -27,6 +30,10 @@ export const NewAuth = () => {
 
     const successHandler = () => {
         setMessage({kind: "success", node: `user authenticated`});
+
+        navigate("/home")?.catch((err: unknown) => {
+            console.error(`failed to redirect user to home page after successfully login: ${err instanceof Error ? err : Error("unknown error")}`);
+        });
     };
 
     const authenticate = (e: FormEvent) => {

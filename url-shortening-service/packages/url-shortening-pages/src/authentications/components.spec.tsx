@@ -6,74 +6,80 @@ import type {AuthService} from "./authentications.ts";
 import {AuthServiceContext} from "./contexts.ts";
 import {NewAuth} from "./components.tsx";
 import {userEvent, type UserEvent} from "@testing-library/user-event";
+import {MemoryRouter, Route, Routes} from "react-router";
 
 describe("new authentication component", () => {
     const authenticate = vi.fn();
     const authService: AuthService = {authenticate};
 
-    beforeEach(() => {
-        const withAuthServiceProvided = ({children}: { children: ReactNode }) => {
-            return (
-                <AuthServiceContext value={authService}>
-                    {children}
-                </AuthServiceContext>
-            );
-        };
+    const withContextAndRouter = ({children}: { children: ReactNode }) => {
+        return (
+            <AuthServiceContext value={authService}>
+                <MemoryRouter initialEntries={["/login"]}>{children}</MemoryRouter>
+            </AuthServiceContext>
+        );
+    };
 
-        render(<NewAuth/>, {wrapper: withAuthServiceProvided});
-    });
+    const renderNewAuthentication = () => {
+        render(
+            <Routes>
+                <Route path="/login" element={<NewAuth/>}/>
+                <Route path="/home" element={<h1>Mocked Home</h1>}/>
+            </Routes>, {wrapper: withContextAndRouter}
+        );
+    };
 
     it("should have a form for credentials", () => {
+        renderNewAuthentication();
+
         expect(screen.getByRole("textbox", {name: "Email"})).toBeInTheDocument();
         expect(screen.getByLabelText("Password")).toBeInTheDocument();
         expect(screen.getByRole("button")).toBeInTheDocument();
     });
 
-    describe("given valid user credentials", () => {
+    describe("when submitting the credentials", () => {
         let user: UserEvent;
 
-        beforeEach(async () => {
+        const submit = async () => {
+            renderNewAuthentication();
+
             user = userEvent.setup();
 
             const email = screen.getByRole("textbox", {name: "Email"});
             const password = screen.getByLabelText("Password");
 
-            await user.type(email, "name@email.com");
-            await user.type(password, "my-pass")
-        });
-
-        it("should authenticate the user once submitted", async () => {
-            authenticate.mockResolvedValue("secret-token");
+            await user.type(email, "anything@email.com");
+            await user.type(password, "anything")
 
             await user.click(screen.getByRole("button"));
+        };
 
-            expect(authenticate).toHaveBeenCalled();
-            expect(screen.getByText(/user authenticated/i)).toBeInTheDocument();
-        });
-    });
+        describe("when the service respond successfully with the secret token", () => {
+            beforeEach(() => {
+                authenticate.mockResolvedValue("secret-token");
+            });
 
-    describe("given invalid user credentials", () => {
-        let user: UserEvent;
+            it("should authenticate the user", async () => {
+                await submit();
 
-        beforeEach(async () => {
-            user = userEvent.setup();
-
-            const email = screen.getByRole("textbox", {name: "Email"});
-            const password = screen.getByLabelText("Password");
-
-            await user.type(email, "anything@anything.com");
-            await user.type(password, "anything");
+                expect(authenticate).toHaveBeenCalled();
+                expect(await screen.findByRole("heading", {name: /mocked home/i})).toBeInTheDocument();
+            });
         });
 
-        it("should fail to authenticate the user once submitted", async () => {
-            const errors = new Error("authentication failed: some error");
+        describe("when the service fails", () => {
+            const errors = new Error("authentication failed: mocked error");
 
-            authenticate.mockRejectedValueOnce(errors);
+            beforeEach(() => {
+                authenticate.mockRejectedValueOnce(errors);
+            });
 
-            await user.click(screen.getByRole("button"));
+            it("should fail to authenticate the user", async () => {
+                await submit();
 
-            expect(authenticate).toHaveBeenCalled();
-            expect(screen.getByText(/authentication failed.*some error/i)).toBeInTheDocument();
+                expect(authenticate).toHaveBeenCalled();
+                expect(screen.getByText(/authentication failed.*mocked error/i)).toBeInTheDocument();
+            });
         });
     });
 });

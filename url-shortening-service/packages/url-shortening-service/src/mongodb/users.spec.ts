@@ -14,9 +14,9 @@ describe("mongodb user service", () => {
 
     describe("create user", () => {
         it("should create the user at the mongodb and return it", async () => {
-            mockInsertOne.mockResolvedValue({insertedId: "some-id"});
+            mockInsertOne.mockResolvedValue({insertedId: "test-id"});
 
-            const user = {name: "user"};
+            const user = {name: "test"};
             const createdUser = await service.create(user);
 
             expect(createdUser.id).toBeTruthy();
@@ -27,7 +27,7 @@ describe("mongodb user service", () => {
         it("should throw on mongodb client error", async () => {
             mockInsertOne.mockRejectedValue(new Error("mocked client"));
 
-            const user = {name: "user"};
+            const user = {name: "test"};
             const createUser = () => service.create(user);
 
             await expect(createUser).rejects.toThrow(/failed to store.*mocked client/);
@@ -40,20 +40,21 @@ describe("mongodb user service", () => {
         describe("given the user is found", () => {
             beforeEach(() => {
                 mockFindOne.mockResolvedValue({
-                    name: "peter",
-                    email: "peter@email.com",
+                    _id: "test-id",
+                    name: "test",
+                    email: "test@email.com",
                     password: "<encrypted>",
                 });
             });
 
             it("should return the user as authenticable", async () => {
                 const authenticable =
-                    await service.findByEmail("peter@email.com");
+                    await service.findByEmail("test@email.com");
 
                 expect(authenticable).toBeTruthy();
-                expect(authenticable?.email).toEqual("peter@email.com");
+                expect(authenticable?.email).toEqual("test@email.com");
                 expect(mockDb.collection).toHaveBeenCalledWith("users");
-                expect(mockFindOne).toHaveBeenCalledWith({email: "peter@email.com"});
+                expect(mockFindOne).toHaveBeenCalledWith({email: "test@email.com"});
             });
         });
 
@@ -64,11 +65,11 @@ describe("mongodb user service", () => {
 
             it("should return no user", async () => {
                 const authenticable =
-                    await service.findByEmail("peter@email.com");
+                    await service.findByEmail("test@email.com");
 
                 expect(authenticable).toBeNull();
                 expect(mockDb.collection).toHaveBeenCalledWith("users");
-                expect(mockFindOne).toHaveBeenCalledWith({email: "peter@email.com"});
+                expect(mockFindOne).toHaveBeenCalledWith({email: "test@email.com"});
             });
         });
 
@@ -79,7 +80,7 @@ describe("mongodb user service", () => {
 
             it("should throw", async () => {
                 const find =
-                    service.findByEmail("peter@email.com");
+                    service.findByEmail("test@email.com");
 
                 await expect(find).rejects.toThrow(/mocked error/);
             });

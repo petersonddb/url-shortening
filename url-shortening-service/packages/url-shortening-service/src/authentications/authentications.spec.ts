@@ -10,51 +10,49 @@ describe("authenticate use case", () => {
     describe("given a authenticable is found", () => {
         beforeEach(() => {
             findByEmailMock.mockResolvedValue({
-                name: "peter",
-                email: "peter@email.com",
+                id: "test-id",
+                name: "test",
+                email: "test@email.com",
                 password: "$2b$10$XFwlhTEIecWzekRWGuwkBualeCYU7mvjNxWM2BL505MlHao8g1gn2"
             });
         });
 
         describe("given valid credentials", () => {
-            const email = "peter@email.com";
-            const password = "Pass123!";
+            const run = () =>
+                authenticate({email: "test@email.com", password: "Pass123!"}, authenticableService);
 
             it("should return a auth token", async () => {
-                const authToken =
-                    await authenticate({email, password}, authenticableService);
-
+                const authToken = await run();
                 const payload = jwt.decode(authToken);
 
-                if (payload != null && typeof payload != "string" && payload.iat && payload.exp) {
+                if (payload == null || typeof payload === "string" || !payload.iat || !payload.exp) {
+                    fail("unexpected auth token payload type, should be a JwtPayload");
+                } else {
+                    // expiration
                     const expYear =
                         new Date(payload.exp * 1000).getFullYear() - new Date(payload.iat * 1000).getFullYear();
 
                     expect(expYear).toEqual(1);
 
-                    expect(payload.sub).toEqual("peter");
+                    // claims
+                    expect(payload.sub).toEqual("test-id");
                     expect(payload.aud).toEqual("url-shortening");
 
                     // customs
-                    expect(payload.ema).toEqual("peter@email.com");
+                    expect(payload.name).toEqual("test");
 
                     // make sure there is no password added in the payload
                     expect(payload.pas ?? payload.password).toBeUndefined();
-                } else {
-                    fail("unexpected auth token payload type, should be a JwtPayload");
                 }
             });
         });
 
         describe("given invalid credentials", () => {
-            const email = "peter@email.com";
-            const password = "Invalid123!";
+            const run = () =>
+                authenticate({email: "test@email.com", password: "Invalid123!"}, authenticableService);
 
             it("should throw an error for invalid credentials", async () => {
-                const auth =
-                    authenticate({email, password}, authenticableService);
-
-                await expect(auth).rejects.toThrow(/invalid credentials/i);
+                await expect(run()).rejects.toThrow(/invalid credentials/i);
             });
         });
     });
@@ -64,14 +62,11 @@ describe("authenticate use case", () => {
             findByEmailMock.mockResolvedValue(null);
         });
 
+        const run = () =>
+            authenticate({email: "test@email.com", password: "Invalid123!"}, authenticableService);
+
         it("should throw an error for invalid credentials", async () => {
-            const email = "peter@email.com";
-            const password = "Pass123!";
-
-            const auth =
-                authenticate({email, password}, authenticableService);
-
-            await expect(auth).rejects.toThrow(/invalid credentials/i);
+            await expect(run()).rejects.toThrow(/invalid credentials/i);
         })
     });
 
@@ -81,11 +76,11 @@ describe("authenticate use case", () => {
                 .mockRejectedValue(Error("failed to authenticate: mocked failure"));
         });
 
-        it("should throw an error for authenticable failure", async () => {
-            const auth =
-                authenticate({email: "anything@email.com", password: "Anything123!"}, authenticableService);
+        const run = () =>
+            authenticate({email: "anything@email.com", password: "Anything123!"}, authenticableService);
 
-            await expect(auth).rejects.toThrow(/mocked failure/i);
+        it("should throw an error for authenticable failure", async () => {
+            await expect(run()).rejects.toThrow(/mocked failure/i);
         });
     });
 });

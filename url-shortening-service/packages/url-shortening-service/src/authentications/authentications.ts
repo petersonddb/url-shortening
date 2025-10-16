@@ -7,6 +7,7 @@ export type AuthToken = string;
  * Authenticable represents a user
  */
 export interface Authenticable {
+    id: string;
     name: string;
     email: string;
 
@@ -65,7 +66,7 @@ export async function authenticate({email, password}: AuthenticateParams, authen
     }
 
     return jwt.sign(
-        {aud: "url-shortening", sub: authenticable.name, ema: authenticable.email},
+        {aud: "url-shortening", sub: authenticable.id, name: authenticable.name},
         jwtKey,
         {expiresIn: "1y"}
     );

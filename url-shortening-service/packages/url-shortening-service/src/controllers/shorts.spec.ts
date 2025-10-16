@@ -13,119 +13,124 @@ import grpc from "@grpc/grpc-js";
 describe("shorts API", () => {
     const api = request(app);
 
-    describe("POST /api/shorts", () => {
-        let data: object | null = null;
+    describe("with authentication token", () => {
+        const authToken =
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1cmwtc2hvcnRlbmluZyIsInN1YiI6IjY4ZWZlYjcxYjc3MTljOTk1MTNjNDllNiIsIm5hbWUiOiJ0ZXN0IiwiaWF0IjoxNzYwNTUzOTAyLCJleHAiOjE3OTIxMTE1MDJ9.VyBwjX0d3SSCA8ajZnwc3q5czFXvLtqt_EZiypCLFUs";
 
-        const post = async () => {
-            return await api.post('/api/shorts').send({data});
-        };
+        describe("POST /api/shorts", () => {
+            let data: object | null = null;
 
-        describe("given valid data", () => {
-            beforeEach(() => {
-                data = {originalUrl: faker.internet.url()};
-            });
-
-            it("should respond with created short", async () => {
-                const res = await post();
-
-                const body = res.body as { data: { hash: string, originalUrl: string, expire: string } };
-
-                expect(res.statusCode).toEqual(201);
-                expect(res.headers["content-type"]).toMatch(/json/i);
-                expect(body).toHaveProperty("data");
-                expect(Object.keys(body.data)).toEqual(["hash", "link", "originalUrl", "expire"]);
-                expect(body.data.hash).toBeTruthy();
-            });
-        });
-
-        describe("given wrongly formatted data", () => {
-            beforeEach(() => {
-                data = null;
-            });
-
-            it("should respond with bad format error", async () => {
-                const res = await post();
-
-                const body = res.body as Partial<{ errors: { field: string, messages: string[] }[] }>;
-
-                expect(res.statusCode).toEqual(400);
-                expect(res.headers["content-type"]).toMatch(/json/);
-                expect(body).toHaveProperty("errors");
-                expect(body.errors).toEqual(
-                    expect.arrayContaining([{
-                        field: "short",
-                        messages: [expect.stringMatching(/invalid request/)]
-                    }])
-                );
-            });
-        });
-
-        describe("given invalid data", () => {
-            beforeEach(() => {
-                data = {originalUrl: "invalid"};
-            });
-
-            it("should respond with validation errors", async () => {
-                const res = await post();
-
-                const body = res.body as Partial<{ errors: { field: string, messages: string[] }[] }>;
-
-                expect(res.status).toEqual(422);
-                expect(res.headers["content-type"]).toMatch(/json/);
-                expect(body).toHaveProperty("errors");
-                expect(body.errors).toEqual(
-                    expect.arrayContaining([
-                        {
-                            field: "originalUrl",
-                            messages: [expect.stringMatching(/should be a valid URL/)]
-                        }
-                    ])
-                );
-            })
-        });
-    });
-
-    describe("given some existent shorts", () => {
-        beforeAll(async () => {
-            if (!process.env.MONGODB_SERVER) {
-                fail("could not configure mongodb: connection string is missing");
-            }
-
-            if (!process.env.KEYGEN_SERVICE_URL) {
-                fail("could not configure keygen service: connection string is missing");
-            }
-
-            // prepare services
-            const mongoDbClient = new MongoClient(process.env.MONGODB_SERVER);
-            const shortService = new MongoDbShortService(mongoDbClient);
-
-            const keyClient = new KeysClient(process.env.KEYGEN_SERVICE_URL, grpc.credentials.createInsecure());
-            const keyService = new KeygenKeyService(keyClient);
-
-            // create some shorts
-            for (let i = 0; i < 5; i++) {
-                await createShort({originalUrl: new URL(faker.internet.url())}, keyService, shortService);
-            }
-
-            // close services client
-            await mongoDbClient.close();
-        });
-
-        describe("GET /api/shorts", () => {
-            const get = async () => {
-                return await api.get('/api/shorts');
+            const post = async () => {
+                return await api.post('/api/shorts').auth(authToken, {type: "bearer"}).send({data});
             };
 
-            it("should respond with all existent shorts", async () => {
-                const res = await get();
+            describe("given valid data", () => {
+                beforeEach(() => {
+                    data = {originalUrl: faker.internet.url()};
+                });
 
-                const body = res.body as { data: { hash: string, originalUrl: string, expire: string }[] };
+                it("should respond with created short", async () => {
+                    const res = await post();
 
-                expect(res.status).toEqual(200);
-                expect(res.headers["content-type"]).toMatch(/json/i);
-                expect(body.data).toBeTruthy();
-                expect(body.data.length).toBeGreaterThanOrEqual(5);
-                expect(Object.keys(body.data[0] ?? {})).toEqual(["hash", "link", "originalUrl", "expire"]);
+                    const body = res.body as { data: { hash: string, originalUrl: string, expire: string } };
+
+                    expect(res.statusCode).toEqual(201);
+                    expect(res.headers["content-type"]).toMatch(/json/i);
+                    expect(body).toHaveProperty("data");
+                    expect(Object.keys(body.data)).toEqual(["hash", "link", "originalUrl", "expire"]);
+                    expect(body.data.hash).toBeTruthy();
+                });
+            });
+
+            describe("given wrongly formatted data", () => {
+                beforeEach(() => {
+                    data = null;
+                });
+
+                it("should respond with bad format error", async () => {
+                    const res = await post();
+
+                    const body = res.body as Partial<{ errors: { field: string, messages: string[] }[] }>;
+
+                    expect(res.statusCode).toEqual(400);
+                    expect(res.headers["content-type"]).toMatch(/json/);
+                    expect(body).toHaveProperty("errors");
+                    expect(body.errors).toEqual(
+                        expect.arrayContaining([{
+                            field: "short",
+                            messages: [expect.stringMatching(/invalid request/)]
+                        }])
+                    );
+                });
+            });
+
+            describe("given invalid data", () => {
+                beforeEach(() => {
+                    data = {originalUrl: "invalid"};
+                });
+
+                it("should respond with validation errors", async () => {
+                    const res = await post();
+
+                    const body = res.body as Partial<{ errors: { field: string, messages: string[] }[] }>;
+
+                    expect(res.status).toEqual(422);
+                    expect(res.headers["content-type"]).toMatch(/json/);
+                    expect(body).toHaveProperty("errors");
+                    expect(body.errors).toEqual(
+                        expect.arrayContaining([
+                            {
+                                field: "originalUrl",
+                                messages: [expect.stringMatching(/should be a valid URL/)]
+                            }
+                        ])
+                    );
+                })
+            });
+        });
+
+        describe("given some existent shorts", () => {
+            beforeAll(async () => {
+                if (!process.env.MONGODB_SERVER) {
+                    fail("could not configure mongodb: connection string is missing");
+                }
+
+                if (!process.env.KEYGEN_SERVICE_URL) {
+                    fail("could not configure keygen service: connection string is missing");
+                }
+
+                // prepare services
+                const mongoDbClient = new MongoClient(process.env.MONGODB_SERVER);
+                const shortService = new MongoDbShortService(mongoDbClient);
+
+                const keyClient = new KeysClient(process.env.KEYGEN_SERVICE_URL, grpc.credentials.createInsecure());
+                const keyService = new KeygenKeyService(keyClient);
+
+                // create some shorts
+                for (let i = 0; i < 5; i++) {
+                    await createShort({originalUrl: new URL(faker.internet.url())}, keyService, shortService);
+                }
+
+                // close services client
+                await mongoDbClient.close();
+            });
+
+            describe("GET /api/shorts", () => {
+                const get = async () => {
+                    return await api.get('/api/shorts').auth(authToken, {type: "bearer"});
+                };
+
+                it("should respond with all existent shorts", async () => {
+                    const res = await get();
+
+                    const body = res.body as { data: { hash: string, originalUrl: string, expire: string }[] };
+
+                    expect(res.status).toEqual(200);
+                    expect(res.headers["content-type"]).toMatch(/json/i);
+                    expect(body.data).toBeTruthy();
+                    expect(body.data.length).toBeGreaterThanOrEqual(5);
+                    expect(Object.keys(body.data[0] ?? {})).toEqual(["hash", "link", "originalUrl", "expire"]);
+                });
             });
         });
     });

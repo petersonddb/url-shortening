@@ -18,14 +18,14 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AddIcon from '@mui/icons-material/Add';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import { Link as RouterLink } from "react-router";
+import {Link as RouterLink, useNavigate} from "react-router";
 import {useRouteMatch} from "./hooks.tsx";
 import {type FormEvent, type ReactNode, useEffect, useState} from "react";
 import {useService} from "../services/hooks.tsx";
 import {ShortServiceContext} from "../shorts/contexts.tsx";
 import type {Short} from "../shorts/shorts.ts";
 import {Message, type MessageContent} from "../messages/components.tsx";
-import {ValidationErrors} from "../errors/errors.ts";
+import {AuthError, ValidationErrors} from "../errors/errors.ts";
 
 type Page = "/home" | "/home/settings";
 
@@ -93,9 +93,10 @@ const Header = ({currentTab}: HeaderProps) => {
 type NewShortParams = {
     onCreated: (short: Short) => void;
     onFailed: (err: Error) => void;
+    onRequireAuthentication: () => void;
 };
 
-const NewShort = ({onCreated, onFailed}: NewShortParams) => {
+const NewShort = ({onCreated, onFailed, onRequireAuthentication}: NewShortParams) => {
     const [generatingShort, setGeneratingShort] = useState(false);
     // TODO: Consider useReducer for the casting string/url
     const [originalUrl, setOriginalUrl] = useState<string>("");
@@ -110,22 +111,22 @@ const NewShort = ({onCreated, onFailed}: NewShortParams) => {
     }
 
     const errorHandler = (err: Error) => {
-        let message: string;
+        console.error(err.message);
 
-        if (err instanceof ValidationErrors) {
+        if (err instanceof AuthError) {
+            onRequireAuthentication();
+        } else if (err instanceof ValidationErrors) {
             console.error(err.errors);
 
-            message =
+            const message =
                 `${err.message}: ${err.errors.map((e) => `${e.field}: ${e.messages.join(", ")}`).join("; ")}`;
 
             setValidationErrors(true);
+
+            onFailed(new Error(message));
         } else {
-            console.error(err.message);
-
-            message = err.message;
+            onFailed(err);
         }
-
-        onFailed(new Error(message));
     }
 
     const generateShort = (event: FormEvent) => {
@@ -252,9 +253,10 @@ const ShortsList = ({loading, error, items, onRetry}: ShortListProps) => {
 
 type ShortsParams = {
     onMessage: (content: MessageContent) => void;
+    onRequireAuthentication: () => void;
 };
 
-const Shorts = ({onMessage}: ShortsParams) => {
+const Shorts = ({onMessage, onRequireAuthentication}: ShortsParams) => {
     const [shorts, setShorts] = useState<Short[]>([]);
 
     const [load, setLoad] = useState(true);
@@ -262,17 +264,21 @@ const Shorts = ({onMessage}: ShortsParams) => {
 
     const shortService = useService(ShortServiceContext);
 
-    const successHandler = (shorts: Short[]) => {
-        setShorts([...shorts]);
-    };
-
-    const errorHandler = (err: Error) => {
-        console.error(err.message);
-
-        setError(true);
-    };
-
     useEffect(() => {
+        const successHandler = (shorts: Short[]) => {
+            setShorts([...shorts]);
+        };
+
+        const errorHandler = (err: Error) => {
+            console.error(err.message);
+
+            if (err instanceof AuthError) {
+                onRequireAuthentication();
+            } else {
+                setError(true);
+            }
+        };
+
         if (load) {
             setError(false);
 
@@ -284,7 +290,7 @@ const Shorts = ({onMessage}: ShortsParams) => {
                     setLoad(false);
                 });
         }
-    }, [load, shortService]);
+    }, [load, onRequireAuthentication, shortService]);
 
     return (
         <Box id="shorts">
@@ -292,13 +298,15 @@ const Shorts = ({onMessage}: ShortsParams) => {
                 <Typography variant="h6">Short Links</Typography>
                 <NewShort
                     onCreated={(short) => {
-                        onMessage({kind: "success", node: `Short link generated: ${short.hash}`});
+                        onMessage({kind: "success", node: `Short link generated: ${short.link}`});
 
                         setLoad(true);
                     }}
                     onFailed={(err) => {
                         onMessage({kind: "error", node: err.message});
-                    }}/>
+                    }}
+                    onRequireAuthentication={onRequireAuthentication}
+                />
             </Box>
 
             <Divider/>
@@ -350,11 +358,25 @@ export const Home = ({settingsRequestUrl}: HomeProps) => {
 
     const [message, setMessage] = useState<MessageContent | undefined>();
 
+    const navigate = useNavigate();
+
+    const requireAuthentication = () => {
+        navigate("/login")?.catch((err: unknown) => {
+            setMessage({
+                kind: "error",
+                node: `failed to navigate to login page: ${err instanceof Error ? err : Error("unknown error")}`
+            });
+        });
+    }
+
     return (
         <Container id="home" disableGutters maxWidth={false}>
             <Header currentTab={currentTab}/>
 
-            <TabPanel id="shorts-view" value={currentTab} index="/home"><Shorts onMessage={setMessage}/></TabPanel>
+            <TabPanel id="shorts-view" value={currentTab} index="/home">
+                <Shorts onMessage={setMessage} onRequireAuthentication={requireAuthentication}/>
+            </TabPanel>
+
             <TabPanel id="settings-view" value={currentTab} index="/home/settings">
                 <Settings settingsRequestUrl={settingsRequestUrl}/>
             </TabPanel>

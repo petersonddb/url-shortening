@@ -4,40 +4,38 @@ import {Home} from "./components.tsx";
 import {render, screen, within} from "@testing-library/react";
 import type {Short, ShortService} from "../shorts/shorts.ts";
 import {ShortServiceContext} from "../shorts/contexts.tsx";
-import {MemoryRouter} from "react-router";
+import {MemoryRouter, Route, Routes} from "react-router";
 import {userEvent, type UserEvent} from "@testing-library/user-event";
-import {ValidationErrors} from "../errors/errors.ts";
+import {AuthError, ValidationErrors} from "../errors/errors.ts";
 import {type ReactNode} from "react";
-import type {JSX} from "react/jsx-runtime";
 
 describe("home component", () => {
     const list = vi.fn().mockResolvedValue([]);
     const create = vi.fn();
     const shortService: ShortService = {list, create};
     const settingsRequestUrl = "https://support.com/open?title=some-prefilled-text";
+    const component = <Home settingsRequestUrl={settingsRequestUrl}/>;
 
-    let withContexts: ({children}: { children: ReactNode }) => JSX.Element;
-    let component: JSX.Element;
+    const withContextsAndRoutes = ({children}: { children: ReactNode }) => {
+        return (
+            <ShortServiceContext value={shortService}>
+                <MemoryRouter initialEntries={["/home"]}>
+                    <Routes>
+                        <Route path="/home/*" element={children} />
+                        <Route path="/login" element={<h1>Mocked Login</h1>} />
+                    </Routes>
+                </MemoryRouter>
+            </ShortServiceContext>
+        )
+    };
+
     let user: UserEvent;
-    let renderHome: () => void;
 
-    beforeEach(() => {
-        withContexts = ({children}) => {
-            return (
-                <ShortServiceContext value={shortService}>
-                    <MemoryRouter initialEntries={["/home"]}>{children}</MemoryRouter>
-                </ShortServiceContext>
-            )
-        }
+    const renderHome = () => {
+        render(component, {wrapper: withContextsAndRoutes});
 
-        component = <Home settingsRequestUrl={settingsRequestUrl}/>;
-
-        renderHome = () => {
-            render(component, {wrapper: withContexts});
-
-            user = userEvent.setup();
-        };
-    });
+        user = userEvent.setup();
+    };
 
     describe("when on the default view: shorts", () => {
         it("should have navigation links for all views", async () => {
@@ -139,7 +137,7 @@ describe("home component", () => {
                     await user.click(await screen.findByRole("button"));
                 };
 
-                describe("when the server respond with validation errors", () => {
+                describe("when the service return validation errors", () => {
                     const validationError = new ValidationErrors([
                         {field: "originalUrl", messages: ["empty url", "invalid url"]},
                         {field: "other", messages: ["invalid other"]}
@@ -160,7 +158,22 @@ describe("home component", () => {
                     });
                 })
 
-                describe("when the server respond with an error", () => {
+                describe("when the service return an authentication error", () => {
+                    const error = new AuthError("mocked auth");
+
+                    beforeEach(() => {
+                        create.mockRejectedValue(error);
+                    });
+
+                    it("should redirect to login page", async () => {
+                        await submit();
+
+                        expect(create).toHaveBeenCalled();
+                        expect(await screen.findByRole("heading", {name: /mocked login/i}));
+                    });
+                });
+
+                describe("when the service throw an error", () => {
                     const error = new Error("some error");
 
                     beforeEach(() => {
@@ -176,7 +189,7 @@ describe("home component", () => {
                 });
             });
 
-            describe("when it fails to load the shorts", () => {
+            describe("when service fails to load the shorts", () => {
                 const error = new Error("some error");
 
                 beforeEach(() => {
@@ -205,6 +218,21 @@ describe("home component", () => {
                         expect(await screen.findByRole("row", {name: new RegExp(shorts[0].link.toString())}))
                             .toBeInTheDocument();
                     });
+                });
+            });
+
+            describe("when it fails to load shorts with an authentication error", () => {
+                const error = new AuthError();
+
+                beforeEach(() => {
+                    list.mockRejectedValue(error);
+                });
+
+                it("should redirect to login page", async () => {
+                    renderHome();
+
+                    expect(list).toHaveBeenCalled();
+                    expect(await screen.findByRole("heading", {name:/mocked login/i}));
                 });
             });
         });

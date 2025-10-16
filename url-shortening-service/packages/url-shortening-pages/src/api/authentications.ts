@@ -18,12 +18,26 @@ type ErrorResponseMessage = {
 export class ApiAuthService implements AuthService {
     private readonly baseUrl: string;
 
+    private latestAuthorization: string | null;
+
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
+        this.latestAuthorization = null;
+    }
+
+    get authorization(): string | null {
+        if (this.latestAuthorization == null) {
+            return null;
+        }
+
+        return `Bearer ${this.latestAuthorization}`;
     }
 
     async authenticate({email, password}: AuthenticateParams): Promise<AuthToken> {
         console.info(`sending user ${email} authentication request to the api`);
+
+        // remove past authorization
+        this.latestAuthorization = null;
 
         const credentials = btoa(`${email}:${password}`);
 
@@ -50,6 +64,8 @@ export class ApiAuthService implements AuthService {
 
         if (response.ok) {
             if (data) {
+                this.latestAuthorization = data;
+
                 return data;
             }
 

@@ -20,81 +20,100 @@ describe("api auth service", () => {
         server.resetHandlers();
     });
 
-    describe("when authentication succeeds", () => {
-        const authToken = "secret-token";
+    describe("authenticate", () => {
+        const authenticate = () =>
+            service.authenticate({email: "any", password: "any"});
 
-        beforeEach(() => {
-            server.use(http.post(`${baseUrl}/api/authentications`, ({request}) => {
-                if (!request.headers.has("Authorization")) {
-                    return HttpResponse.json({}, {status: 400});
-                }
+        describe("when authentication succeeds", () => {
+            const authToken = "secret-token";
 
-                return HttpResponse.json({data: authToken}, {status: 202})
-            }));
+            beforeEach(() => {
+                server.use(http.post(`${baseUrl}/api/authentications`, ({request}) => {
+                    if (!request.headers.has("Authorization")) {
+                        return HttpResponse.json({}, {status: 400});
+                    }
+
+                    return HttpResponse.json({data: authToken}, {status: 202})
+                }));
+            });
+
+            it("should return an authentication token", async () => {
+                const gotAuthToken = await authenticate();
+
+                expect(gotAuthToken).toEqual(authToken);
+            });
+
+            it("should store authentication token and data", async () => {
+                await authenticate();
+
+                expect(service.authorization).toEqual(`Bearer ${authToken}`);
+            });
         });
 
-        it("should return an authentication token", async () => {
-            const gotAuthToken =
-                await service.authenticate({email: "any", password: "any"});
+        describe("when authentication succeeds with inconsistent response", () => {
+            beforeEach(() => {
+                server.use(http.post(`${baseUrl}/api/authentications`, ({request}) => {
+                    if (!request.headers.has("Authorization")) {
+                        return HttpResponse.json({}, {status: 400});
+                    }
 
-            expect(gotAuthToken).toEqual(authToken);
-        });
-    });
+                    return HttpResponse.json({format: "unknown"}, {status: 202});
+                }));
+            });
 
-    describe("when authentication succeeds with inconsistent response", () => {
-        beforeEach(() => {
-            server.use(http.post(`${baseUrl}/api/authentications`, ({request}) => {
-                if (!request.headers.has("Authorization")) {
-                    return HttpResponse.json({}, {status: 400});
-                }
-                
-                return HttpResponse.json({format: "unknown"}, {status: 202});
-            }));
-        });
+            it("should throw an error about it", async () => {
+                await expect(authenticate()).rejects.toThrow(/invalid server response/);
+            })
 
-        it("should throw an error about it", async () => {
-            const promise =
-                service.authenticate({email: "any", password: "any"});
+            it("should not store authentication token and data", async () => {
+                await expect(authenticate()).rejects.toThrow();
 
-            await expect(promise).rejects.toThrow(/invalid server response/);
-        })
-    });
-
-    describe("when request fails", () => {
-        beforeEach(() => {
-            server.use(http.post(`${baseUrl}/api/authentications`, () => {
-                return HttpResponse.error();
-            }))
+                expect(service.authorization).toBeNull();
+            });
         });
 
-        it("should throw an error about it", async () => {
-            const promise =
-                service.authenticate({email: "any", password: "any"});
+        describe("when request fails", () => {
+            beforeEach(() => {
+                server.use(http.post(`${baseUrl}/api/authentications`, () => {
+                    return HttpResponse.error();
+                }))
+            });
 
-            await expect(promise).rejects.toThrow(/server request failed/);
-        })
-    });
+            it("should throw an error about it", async () => {
+                await expect(authenticate()).rejects.toThrow(/server request failed/);
+            })
 
-    describe("when authentication fails", () => {
-        beforeEach(() => {
-            server.use(http.post(`${baseUrl}/api/authentications`, () => {
-                return HttpResponse.json(
-                    {
-                        errors: [
-                            {field: "authentication", messages: ["some failure", "some failure 2"]},
-                            {field: "other", messages: ["other failure"]},
-                        ]
-                    },
-                    {status: 500}
-                );
-            }));
+            it("should not store authentication token and data", async () => {
+                await expect(authenticate()).rejects.toThrow();
+
+                expect(service.authorization).toBeNull();
+            });
         });
 
-        it("should throw an error with server response", async () => {
-            const promise =
-                service.authenticate({email: "anything", password: "anything"});
+        describe("when authentication fails", () => {
+            beforeEach(() => {
+                server.use(http.post(`${baseUrl}/api/authentications`, () => {
+                    return HttpResponse.json(
+                        {
+                            errors: [
+                                {field: "authentication", messages: ["some failure", "some failure 2"]},
+                                {field: "other", messages: ["other failure"]},
+                            ]
+                        },
+                        {status: 500}
+                    );
+                }));
+            });
 
-            await expect(promise).rejects.toThrow(/authentication: some failure, some failure 2\nother: other failure/);
+            it("should throw an error with server response", async () => {
+                await expect(authenticate()).rejects.toThrow(/authentication: some failure, some failure 2\nother: other failure/);
+            });
+
+            it("should not store authentication token and data", async () => {
+                await expect(authenticate()).rejects.toThrow();
+
+                expect(service.authorization).toBeNull();
+            });
         });
     });
 });

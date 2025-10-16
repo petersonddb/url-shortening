@@ -16,5 +16,11 @@ export type AuthenticateParams = {
  *  AuthService provides authentication actions
  */
 export interface AuthService {
+    /**
+     * authorization string; this is only valid after
+     * successfully authentication with authenticate
+     */
+    authorization: string | null;
+
     authenticate(params: AuthenticateParams): Promise<AuthToken>;
 }

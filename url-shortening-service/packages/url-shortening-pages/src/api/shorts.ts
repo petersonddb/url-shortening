@@ -1,5 +1,6 @@
 import type {CreateShortParams, Short, ShortService} from "../shorts/shorts.ts";
-import {ValidationErrors} from "../errors/errors.ts";
+import {AuthError, ValidationErrors} from "../errors/errors.ts";
+import type {AuthService} from "../authentications/authentications.ts";
 
 type RequestMessage = {
     data: {
@@ -38,9 +39,11 @@ type ErrorResponseMessage = {
  */
 export class ApiShortService implements ShortService {
     private readonly baseUrl: string;
+    private readonly authService: AuthService;
 
-    constructor(baseUrl: string) {
+    constructor(baseUrl: string, authService: AuthService) {
         this.baseUrl = baseUrl;
+        this.authService = authService;
     }
 
     async create({originalUrl}: CreateShortParams): Promise<Short> {
@@ -51,10 +54,12 @@ export class ApiShortService implements ShortService {
         let response: Response;
         let json: Partial<CreateResponseMessage> & Partial<ErrorResponseMessage>;
         try {
-            // TODO: Add auth information
             response = await fetch(`${this.baseUrl}/api/shorts`, {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": this.authService.authorization ?? "",
+                },
                 body: JSON.stringify(shortRequest),
             });
 
@@ -80,6 +85,11 @@ export class ApiShortService implements ShortService {
             throw new Error("failed to create new short: invalid server response for created short");
         }
 
+        // Authentication error
+        if (response.status === 401) {
+            throw new AuthError();
+        }
+
         // Validations failed
         if (errors && response.status === 422) {
             throw new ValidationErrors(errors);
@@ -98,8 +108,11 @@ export class ApiShortService implements ShortService {
         let response: Response;
         let json: Partial<ListResponseMessage> & Partial<ErrorResponseMessage>;
         try {
-            // TODO: Add auth information
-            response = await fetch(`${this.baseUrl}/api/shorts`);
+            response = await fetch(`${this.baseUrl}/api/shorts`, {
+                headers: {
+                    "Authorization": this.authService.authorization ?? "",
+                }
+            });
 
             json = await response.json() as Partial<ListResponseMessage> & Partial<ErrorResponseMessage>;
         } catch (err: unknown) {
@@ -122,6 +135,11 @@ export class ApiShortService implements ShortService {
             }
 
             throw new Error("failed to list shorts: invalid server response for shorts list");
+        }
+
+        // Authentication error
+        if (response.status === 401) {
+            throw new AuthError();
         }
 
         const message = errors

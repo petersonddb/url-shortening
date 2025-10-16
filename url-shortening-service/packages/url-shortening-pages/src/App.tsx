@@ -20,7 +20,7 @@ const SettingsRequestUrl: string = import.meta.env.VITE_SETTINGS_REQUEST_URL as 
 function App() {
     const [userService] = useState<UserService>(new ApiUserService(ApiBaseUrl));
     const [authService] = useState<AuthService>(new ApiAuthService(ApiBaseUrl));
-    const [shortService] = useState<ShortService>(new ApiShortService(ApiBaseUrl));
+    const [shortService] = useState<ShortService>(new ApiShortService(ApiBaseUrl, authService));
 
     return (
         <UserServiceContext value={userService}>

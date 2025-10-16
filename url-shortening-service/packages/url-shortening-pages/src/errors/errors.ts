@@ -18,3 +18,9 @@ export class ValidationErrors extends Error {
         this.errors = validationErrors;
     }
 }
+
+/**
+ * AuthError points valid credentials are requirement
+ */
+export class AuthError extends Error {
+}

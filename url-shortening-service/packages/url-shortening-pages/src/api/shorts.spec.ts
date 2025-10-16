@@ -3,11 +3,13 @@ import {ApiShortService} from "./shorts.ts";
 import {setupServer} from "msw/node";
 import {http, HttpResponse} from "msw";
 import type {Short} from "../shorts/shorts.ts";
-import {ValidationErrors} from "../errors/errors.ts";
+import {AuthError, ValidationErrors} from "../errors/errors.ts";
+import type {AuthService} from "../authentications/authentications.ts";
 
 describe("api short service", () => {
     const baseUrl = "http://localhost:3000";
-    const service = new ApiShortService(baseUrl);
+    const authService: Partial<AuthService> = { authorization: "Bearer token" };
+    const service = new ApiShortService(baseUrl, authService as AuthService);
     const server = setupServer();
 
     beforeAll(() => {
@@ -115,6 +117,18 @@ describe("api short service", () => {
             })
         });
 
+        describe("when the server respond with authentication error", () => {
+            beforeEach(() => {
+                server.use(http.post(`${baseUrl}/api/shorts`, () => {
+                    return HttpResponse.json({}, {status: 401});
+                }));
+            });
+
+            it("should throw an authentication error", async () => {
+                await expect(create).rejects.toThrow(AuthError);
+            });
+        });
+
         describe("when the request fails", () => {
             beforeEach(() => {
                 server.use(http.post(`${baseUrl}/api/shorts`, () => {
@@ -206,6 +220,18 @@ describe("api short service", () => {
 
             it("should throw an error", async () => {
                 await expect(list).rejects.toThrow(/failed to list shorts.*500.*short.*mocked error/i);
+            });
+        });
+
+        describe("when the server respond with authentication error", () => {
+            beforeEach(() => {
+                server.use(http.get(`${baseUrl}/api/shorts`, () => {
+                    return HttpResponse.json({}, {status: 401});
+                }));
+            });
+
+            it("should throw an authentication error", async () => {
+                await expect(list).rejects.toThrow(AuthError);
             });
         });
 

@@ -10,13 +10,17 @@ describe("get redirection link use case", () => {
         getRedirectionUrl("some-hash", mockShortService as ShortService);
 
     describe("when the service returns a still valid short link", () => {
-        const originalUrl = new URL("http://test.com/long-1");
+        const originalUrl = new URL("https://test.com/long-1");
 
         beforeEach(() => {
             const validDate = new Date();
             validDate.setFullYear(validDate.getFullYear() + 1);
 
-            mockFindByHash.mockResolvedValue({hash: "some-hash", originalUrl: originalUrl, expire: validDate} as Short);
+            mockFindByHash.mockResolvedValue({
+                hash: "some-hash",
+                originalUrl: originalUrl,
+                expire: validDate,
+            } as Short);
         });
 
         it("should return the original url for redirection", async () => {
@@ -34,7 +38,7 @@ describe("get redirection link use case", () => {
             mockFindByHash.mockResolvedValue({
                 hash: "some-hash",
                 originalUrl: new URL("https://test.com/long-expired"),
-                expire: expiredDate
+                expire: expiredDate,
             } as Short);
         });
 

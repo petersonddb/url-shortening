@@ -1,4 +1,5 @@
 import type {KeyService} from "../keys/keys.js";
+import {type Validation, ValidationError} from "../errors/validations.js";
 
 /**
  * Short represents a short link for some URL
@@ -7,6 +8,7 @@ export interface Short {
     hash?: string;
     originalUrl?: URL;
     expire?: Date;
+    userId?: string;
 }
 
 /**
@@ -49,26 +51,52 @@ export interface ShortService {
 
 
 /**
+ * validateShortAll against all checks
+ * @param short to be validated
+ * @returns validation results
+ */
+export function validateShortAll(short: Short): Validation {
+    return validateShortUserId(short);
+}
+
+export function validateShortUserId(short: Short): Validation {
+    const validation: Validation = {valid: true, failures: []};
+
+    if (!short.userId) {
+        validation.failures.push({field: "userId", messages: ["should not be empty"]});
+    }
+
+    validation.valid = validation.failures.length === 0;
+    return validation;
+}
+
+/**
  * CreateShortParams for `createShort`
  */
 export interface CreateShortParams {
     originalUrl: URL;
+    userId: string;
 }
 
 /**
  * createShort using given originalUrl preparing with
  * an expiration date and the hash key to be used in the
  * short link
- * @param originalUrl to generate a short link for
+ * @param shortParams to generate the short as the link for the original url and an owning user
  * @param keyService to allocate keys for the hash
  * @param shortService to store the new short link
  * @return the created short
  */
-export async function createShort({originalUrl}: CreateShortParams, keyService: KeyService, shortService: ShortService) {
+export async function createShort(shortParams: CreateShortParams, keyService: KeyService, shortService: ShortService) {
     const expire = new Date();
     expire.setFullYear(expire.getFullYear() + 1);
 
-    const short: Short = {originalUrl, expire};
+    const short: Short = {...shortParams, expire};
+
+    const validation = validateShortAll(short);
+    if (!validation.valid) {
+        throw new ValidationError(validation);
+    }
 
     try {
         short.hash = await keyService.allocate();

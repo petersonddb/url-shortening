@@ -13,6 +13,30 @@ import grpc from "@grpc/grpc-js";
 describe("shorts API", () => {
     const api = request(app);
 
+    describe("with NO authentication token", () => {
+        const authToken = "";
+
+        describe("POST /api/shorts", () => {
+            const post = () => api.post("/api/shorts").auth(authToken, {type: "bearer"}).send({});
+
+            it("should be unauthorized", async () => {
+                const res = await post();
+
+                expect(res.statusCode).toEqual(401);
+            })
+        });
+
+        describe("GET /api/shorts", () => {
+            const get = () => api.get("/api/shorts").auth(authToken, {type: "bearer"}).send();
+
+            it("should be unauthorized", async () => {
+                const res = await get();
+
+                expect(res.statusCode).toEqual(401);
+            })
+        });
+    });
+
     describe("with authentication token", () => {
         const authToken =
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1cmwtc2hvcnRlbmluZyIsInN1YiI6IjY4ZWZlYjcxYjc3MTljOTk1MTNjNDllNiIsIm5hbWUiOiJ0ZXN0IiwiaWF0IjoxNzYwNTUzOTAyLCJleHAiOjE3OTIxMTE1MDJ9.VyBwjX0d3SSCA8ajZnwc3q5czFXvLtqt_EZiypCLFUs";
@@ -37,7 +61,7 @@ describe("shorts API", () => {
                     expect(res.statusCode).toEqual(201);
                     expect(res.headers["content-type"]).toMatch(/json/i);
                     expect(body).toHaveProperty("data");
-                    expect(Object.keys(body.data)).toEqual(["hash", "link", "originalUrl", "expire"]);
+                    expect(Object.keys(body.data)).toEqual(["hash", "link", "originalUrl", "expire", "userId"]);
                     expect(body.data.hash).toBeTruthy();
                 });
             });
@@ -108,7 +132,10 @@ describe("shorts API", () => {
 
                 // create some shorts
                 for (let i = 0; i < 5; i++) {
-                    await createShort({originalUrl: new URL(faker.internet.url())}, keyService, shortService);
+                    await createShort({
+                        originalUrl: new URL(faker.internet.url()),
+                        userId: "68efeb71b7719c99513c49e6" // test user
+                    }, keyService, shortService);
                 }
 
                 // close services client
@@ -129,7 +156,7 @@ describe("shorts API", () => {
                     expect(res.headers["content-type"]).toMatch(/json/i);
                     expect(body.data).toBeTruthy();
                     expect(body.data.length).toBeGreaterThanOrEqual(5);
-                    expect(Object.keys(body.data[0] ?? {})).toEqual(["hash", "link", "originalUrl", "expire"]);
+                    expect(Object.keys(body.data[0] ?? {})).toEqual(["hash", "link", "originalUrl", "expire", "userId"]);
                 });
             });
         });

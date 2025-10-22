@@ -37,7 +37,7 @@ export default {
             return;
         }
 
-        createShort({originalUrl}, req.keyService, req.shortService).then((short) => {
+        createShort({originalUrl, userId: req.authenticated?.id ?? ""}, req.keyService, req.shortService).then((short) => {
             res.status(201).json(serializeShort(short, req.baseRedirectionUrl));
         }).catch((err: unknown) => {
             res.status(500).json(serializeError("short", err instanceof Error ? err : new Error("failed to create short link")));
@@ -63,6 +63,7 @@ interface SerializedShort {
         link: string;
         originalUrl: string;
         expire: string;
+        userId: string;
     }
 }
 
@@ -72,6 +73,7 @@ interface SerializedShorts {
         link: string;
         originalUrl: string;
         expire: string;
+        userId: string;
     }[]
 }
 
@@ -81,7 +83,8 @@ function serializeShort(short: Short, withBaseRedirectionUrl = ""): SerializedSh
             hash: short.hash ?? "",
             link: withBaseRedirectionUrl ? getLink(short, withBaseRedirectionUrl)?.toString() ?? "" : "",
             originalUrl: short.originalUrl?.toString() ?? "",
-            expire: short.expire?.toISOString() ?? ""
+            expire: short.expire?.toISOString() ?? "",
+            userId: short.userId ?? ""
         }
     };
 }

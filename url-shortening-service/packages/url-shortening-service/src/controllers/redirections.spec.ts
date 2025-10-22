@@ -34,7 +34,10 @@ describe("redirections pages", () => {
 
             // create some shorts
             for (let i = 0; i < 5; i++) {
-                const short = await createShort({originalUrl: new URL(faker.internet.url())}, keyService, shortService);
+                const short = await createShort({
+                    originalUrl: new URL(faker.internet.url()),
+                    userId: "68efeb71b7719c99513c49e6" // test user
+                }, keyService, shortService);
 
                 shorts.push(short);
             }

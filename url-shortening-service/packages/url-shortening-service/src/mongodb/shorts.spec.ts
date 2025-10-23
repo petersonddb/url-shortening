@@ -46,7 +46,7 @@ describe("mongodb shorts service", () => {
     });
 
     describe("list shorts", () => {
-        const list = () => service.list();
+        const list = () => service.list("user-id");
 
         describe("when mongodb successfully return all shorts", () => {
             const mockShorts = [
@@ -68,7 +68,7 @@ describe("mongodb shorts service", () => {
 
                 expect(gotShorts).toEqual(shorts);
                 expect(mockDb.collection).toHaveBeenCalledWith("shorts");
-                expect(mockFind).toHaveBeenCalled();
+                expect(mockFind).toHaveBeenCalledWith({userId: "user-id"});
             });
         })
 

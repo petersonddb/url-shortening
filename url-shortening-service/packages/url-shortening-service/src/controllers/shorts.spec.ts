@@ -2,7 +2,7 @@ import {beforeAll, beforeEach, describe, expect, it} from "vitest";
 import request from "supertest";
 import {app} from "../../index.js";
 import {faker} from "@faker-js/faker/locale/en";
-import {createShort} from "../shorts/shorts.js";
+import {createShort, type Short} from "../shorts/shorts.js";
 import {fail} from "node:assert";
 import {MongoClient} from "mongodb";
 import {MongoDbShortService} from "../mongodb/shorts.js";
@@ -114,6 +114,8 @@ describe("shorts API", () => {
         });
 
         describe("given some existent shorts", () => {
+            const userShorts: Short[] = [];
+
             beforeAll(async () => {
                 if (!process.env.MONGODB_SERVER) {
                     fail("could not configure mongodb: connection string is missing");
@@ -132,10 +134,12 @@ describe("shorts API", () => {
 
                 // create some shorts
                 for (let i = 0; i < 5; i++) {
-                    await createShort({
+                    const short = await createShort({
                         originalUrl: new URL(faker.internet.url()),
                         userId: "68efeb71b7719c99513c49e6" // test user
                     }, keyService, shortService);
+
+                    userShorts.push(short);
                 }
 
                 // close services client
@@ -156,6 +160,8 @@ describe("shorts API", () => {
                     expect(res.headers["content-type"]).toMatch(/json/i);
                     expect(body.data).toBeTruthy();
                     expect(body.data.length).toBeGreaterThanOrEqual(5);
+                    expect(body.data.map(short => short.hash))
+                        .toEqual(expect.arrayContaining(userShorts.map(short => short.hash ?? "")));
                     expect(Object.keys(body.data[0] ?? {})).toEqual(["hash", "link", "originalUrl", "expire", "userId"]);
                 });
             });

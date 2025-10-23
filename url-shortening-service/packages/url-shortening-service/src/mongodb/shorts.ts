@@ -36,7 +36,7 @@ export class MongoDbShortService implements ShortService {
         return short;
     }
 
-    async list(): Promise<Short[]> {
+    async list(userId: string): Promise<Short[]> {
         console.log(`listing shorts from mongodb`);
 
         let shorts: MongodbShort[];
@@ -44,7 +44,7 @@ export class MongoDbShortService implements ShortService {
             const res = this.client
                 .db(process.env.MONGODB_DB)
                 .collection<MongodbShort>("shorts")
-                .find();
+                .find({userId: userId});
 
             shorts = await res.toArray(); // NOTE: it might be faster if we return the cursor itself
         } catch (err: unknown) {
@@ -67,12 +67,12 @@ export class MongoDbShortService implements ShortService {
             short = await this.client
                 .db(process.env.MONGODB_DB)
                 .collection<MongodbShort>("shorts")
-                .findOne({ hash: hash });
+                .findOne({hash: hash});
         } catch (err: unknown) {
             throw Error(`failed to find short: ${err instanceof Error ? err : "unknown error"}`);
         }
 
-        if(short == null) {
+        if (short == null) {
             return null;
         }
 

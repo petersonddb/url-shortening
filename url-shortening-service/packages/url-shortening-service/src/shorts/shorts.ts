@@ -44,7 +44,7 @@ export function getLink(short: Short, baseUrl: string): URL | null {
 export interface ShortService {
     create(short: Short): Promise<Short>;
 
-    list(): Promise<Short[]>;
+    list(userId: string): Promise<Short[]>;
 
     findByHash(hash: string): Promise<Short | null>;
 }

@@ -49,7 +49,7 @@ export default {
             throw new Error("failed to handle request: service not available");
         }
 
-        req.shortService.list().then((shorts) => {
+        req.shortService.list(req.authenticated?.id ?? "").then((shorts) => {
             res.json(serializeShorts(shorts, req.baseRedirectionUrl));
         }).catch((err: unknown) => {
             res.status(500).json(serializeError("short", err instanceof Error ? err : new Error("failed to list short links")));

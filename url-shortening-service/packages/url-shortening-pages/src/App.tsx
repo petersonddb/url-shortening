@@ -7,7 +7,7 @@ import {ApiUserService} from "./api/users.ts";
 import {ApiAuthService} from "./api/authentications.ts";
 import type {AuthService} from "./authentications/authentications.ts";
 import {AuthServiceContext} from "./authentications/contexts.ts";
-import {BrowserRouter, Route, Routes} from "react-router";
+import {BrowserRouter, Navigate, Route, Routes} from "react-router";
 import {NewAuth} from "./authentications/components.tsx";
 import {Home} from "./home/components.tsx";
 import type {ShortService} from "./shorts/shorts.ts";
@@ -37,6 +37,8 @@ function App() {
                                     <Home settingsRequestUrl={SettingsRequestUrl}/>
                                 </ShortServiceContext>
                             }/>
+                        
+                        <Route path="*" element={<Navigate to="/home" replace/>}/> {/* redirect to a default path */}
                     </Routes>
                 </BrowserRouter>
             </AuthServiceContext>

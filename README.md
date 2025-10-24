@@ -34,5 +34,5 @@ would start to fail; it is therefore important to have replicas of the servers i
 ### Progress
 
 - [x] Keys Generation Service
+- [x] Main Application
 - [ ] Expired Short Links Cleaner Service
-- [ ] Main Application

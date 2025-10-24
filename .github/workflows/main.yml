@@ -8,4 +8,4 @@ on:
 
 jobs:
   url-shortening-pages-ci:
-    uses: ./url-shortening-service/.github/workflows/ci.yml
+    uses: ./../url-shortening-service/.github/workflows/ci.yml

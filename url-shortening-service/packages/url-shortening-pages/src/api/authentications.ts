@@ -1,4 +1,6 @@
-import type {AuthenticateParams, AuthService, AuthToken} from "../authentications/authentications.ts";
+import type {Authenticated, AuthenticateParams, AuthService, AuthToken} from "../authentications/authentications.ts";
+import {jwtDecode} from "jwt-decode";
+import type {JwtPayload} from "jsonwebtoken";
 
 type ResponseMessage = {
     data: string
@@ -19,10 +21,16 @@ export class ApiAuthService implements AuthService {
     private readonly baseUrl: string;
 
     private latestAuthorization: string | null;
+    private latestAuthenticated: Authenticated | null;
 
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
         this.latestAuthorization = null;
+        this.latestAuthenticated = null;
+    }
+
+    get authenticated(): Authenticated | null {
+        return this.latestAuthenticated;
     }
 
     get authorization(): string | null {
@@ -36,8 +44,9 @@ export class ApiAuthService implements AuthService {
     async authenticate({email, password}: AuthenticateParams): Promise<AuthToken> {
         console.info(`sending user ${email} authentication request to the api`);
 
-        // remove past authorization
+        // remove past authentication data
         this.latestAuthorization = null;
+        this.latestAuthenticated = null;
 
         const credentials = btoa(`${email}:${password}`);
 
@@ -64,7 +73,23 @@ export class ApiAuthService implements AuthService {
 
         if (response.ok) {
             if (data) {
-                this.latestAuthorization = data;
+                let decodedToken: JwtPayload & {name?: string};
+                try {
+                    decodedToken = jwtDecode(data);
+                } catch (err: unknown) {
+                    throw Error(`failed to authenticate user: failed to decode authenticated user: ${err instanceof Error ? err : "unknown failure"}`);
+                }
+
+                if (
+                    typeof decodedToken === "object" &&
+                    typeof decodedToken.name === "string" &&
+                    decodedToken.sub != null
+                ) {
+                    this.latestAuthorization = data;
+                    this.latestAuthenticated = {id: decodedToken.sub, name: decodedToken.name};
+                } else {
+                    throw Error("failed to authenticate user: failed to decode authentication user: bad formatted token");
+                }
 
                 return data;
             }

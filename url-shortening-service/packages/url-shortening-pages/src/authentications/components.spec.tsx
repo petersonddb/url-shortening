@@ -10,7 +10,7 @@ import {MemoryRouter, Route, Routes} from "react-router";
 
 describe("new authentication component", () => {
     const authenticate = vi.fn();
-    const authService: AuthService = {authenticate, authorization: null};
+    const authService: AuthService = {authenticate, authorization: null, authenticated: null};
 
     const withContextAndRouter = ({children}: { children: ReactNode }) => {
         return (

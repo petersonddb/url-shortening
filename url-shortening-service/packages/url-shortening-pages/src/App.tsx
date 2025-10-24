@@ -37,7 +37,7 @@ function App() {
                                     <Home settingsRequestUrl={SettingsRequestUrl}/>
                                 </ShortServiceContext>
                             }/>
-                        
+
                         <Route path="*" element={<Navigate to="/home" replace/>}/> {/* redirect to a default path */}
                     </Routes>
                 </BrowserRouter>

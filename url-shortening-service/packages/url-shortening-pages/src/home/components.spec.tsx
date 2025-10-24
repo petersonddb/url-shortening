@@ -8,23 +8,29 @@ import {MemoryRouter, Route, Routes} from "react-router";
 import {userEvent, type UserEvent} from "@testing-library/user-event";
 import {AuthError, ValidationErrors} from "../errors/errors.ts";
 import {type ReactNode} from "react";
+import type {AuthService} from "../authentications/authentications.ts";
+import {AuthServiceContext} from "../authentications/contexts.ts";
 
 describe("home component", () => {
     const list = vi.fn().mockResolvedValue([]);
     const create = vi.fn();
     const shortService: ShortService = {list, create};
+    const authenticated = {id: "test-user-id", name: "test"};
+    const authService: AuthService = {authenticate: vi.fn(), authorization: "some-token", authenticated};
     const settingsRequestUrl = "https://support.com/open?title=some-prefilled-text";
     const component = <Home settingsRequestUrl={settingsRequestUrl}/>;
 
     const withContextsAndRoutes = ({children}: { children: ReactNode }) => {
         return (
             <ShortServiceContext value={shortService}>
-                <MemoryRouter initialEntries={["/home"]}>
-                    <Routes>
-                        <Route path="/home/*" element={children} />
-                        <Route path="/login" element={<h1>Mocked Login</h1>} />
-                    </Routes>
-                </MemoryRouter>
+                <AuthServiceContext value={authService}>
+                    <MemoryRouter initialEntries={["/home"]}>
+                        <Routes>
+                            <Route path="/home/*" element={children}/>
+                            <Route path="/login" element={<h1>Mocked Login</h1>}/>
+                        </Routes>
+                    </MemoryRouter>
+                </AuthServiceContext>
             </ShortServiceContext>
         )
     };
@@ -38,6 +44,12 @@ describe("home component", () => {
     };
 
     describe("when on the default view: shorts", () => {
+        it("should have a header with user identification", async () => {
+            renderHome();
+
+            expect(await screen.findByRole("heading", {name: "test (test-user-id) / home"})).toBeInTheDocument();
+        });
+
         it("should have navigation links for all views", async () => {
             renderHome();
 
@@ -232,7 +244,7 @@ describe("home component", () => {
                     renderHome();
 
                     expect(list).toHaveBeenCalled();
-                    expect(await screen.findByRole("heading", {name:/mocked login/i}));
+                    expect(await screen.findByRole("heading", {name: /mocked login/i}));
                 });
             });
         });

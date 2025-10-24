@@ -26,6 +26,7 @@ import {ShortServiceContext} from "../shorts/contexts.tsx";
 import type {Short} from "../shorts/shorts.ts";
 import {Message, type MessageContent} from "../messages/components.tsx";
 import {AuthError, ValidationErrors} from "../errors/errors.ts";
+import {AuthServiceContext} from "../authentications/contexts.ts";
 
 type Page = "/home" | "/home/settings";
 
@@ -57,14 +58,19 @@ interface HeaderProps {
 }
 
 const Header = ({currentTab}: HeaderProps) => {
+    const authService = useService(AuthServiceContext);
+
+    const userIdentification =
+        `${authService.authenticated?.name ?? "unknown"} (${authService.authenticated?.id ?? "unknown"})`;
+
     return (
         <AppBar position="static" color="default"
                 sx={{p: 1, pb: 0, borderBottom: "1px solid lightgrey", boxShadow: "none"}}>
 
             <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
-                <Typography variant="h6">user.name / home</Typography>
+                <Typography variant="h6">{`${userIdentification} / home`}</Typography>
 
-                <Link href="#"><LogoutIcon/></Link>
+                <Link href="/"><LogoutIcon/></Link>
             </Box>
 
             <Tabs value={currentTab} textColor="inherit" aria-label="home screen views">

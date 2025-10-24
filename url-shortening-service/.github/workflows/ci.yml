@@ -1,0 +1,15 @@
+name: URL Shortening Service CI
+
+on:
+  push:
+    branches: [ main ]
+  pull-request:
+    branches: [ main ]
+
+jobs:
+  pages-test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Hello, World!
+        run: hello, world!

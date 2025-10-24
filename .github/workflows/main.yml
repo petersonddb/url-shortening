@@ -7,5 +7,6 @@ on:
     branches: [ main ]
 
 jobs:
-  url-shortening-pages-ci:
-    uses: ./../url-shortening-service/.github/workflows/ci.yml
+  service-ci:
+    name: Service CI
+    uses: ./.github/workflows/service.yml

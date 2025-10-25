@@ -1,0 +1,30 @@
+name: Service Pages CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.6
+          cache: 'npm'
+          cache-dependency-path: url-shortening-service/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: url-shortening-service
+        run: npm ci
+
+      - name: Run Tests
+        working-directory: url-shortening-service
+        run: lerna run --scope url-shortening-pages test

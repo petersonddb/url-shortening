@@ -40,6 +40,14 @@ jobs:
   test:
     runs-on: ubuntu-24.04
 
+    services:
+      keys-db:
+        image: valkey/valkey:8.1.1 # for open-source Redis
+        ports:
+          - "6380:6379"
+        env:
+          VALKEY_EXTRA_FLAGS: "--save ''" # optimized for testing, data will always be flushed by tests
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5

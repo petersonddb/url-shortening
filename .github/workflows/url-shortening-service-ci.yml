@@ -35,9 +35,17 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}
         run: lerna run lint
 
-
   test:
     runs-on: ubuntu-24.04
+
+    services:
+      app-db:
+        image: mongodb/mongodb-community-server:6.0-ubi8
+        ports:
+          - "27017:27017"
+        environment:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: pass
 
     steps:
       - name: Checkout Code
@@ -56,4 +64,9 @@ jobs:
 
       - name: Run Tests
         working-directory: ${{ env.WORKING_DIR }}
+        env:
+          MONGODB_SERVER: mongodb://root:pass@localhost:27017
+          MONGODB_DB: testing
+          JWT_SECRET: very-secret
+          BASE_REDIRECTION_URL: https://testing.run
         run: lerna run test

@@ -24,6 +24,9 @@ jobs:
         with:
           go-version-file: ${{ env.WORKING_DIR }}/go.mod
           cache: ${{ env.WORKING_DIR }}/go.sum
+
+      - name: Install Tools
+        working-directory: ${{ env.WORKING_DIR }}
         run: make install-linter
 
       - name: Install Dependencies

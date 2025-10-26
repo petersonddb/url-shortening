@@ -1,0 +1,35 @@
+name: Keygen Service CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+
+env:
+  WORKING_DIR: keygen-service
+
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.WORKING_DIR }}/go.mod
+          cache: ${{ env.WORKING_DIR }}/go.sum
+        run: make install-linter
+
+      - name: Install Dependencies
+        working-directory: ${{ env.WORKING_DIR }}
+        run: go mod download
+
+      - name: Run Linter
+        working-directory: ${{ env.WORKING_DIR }}
+        run: make lint

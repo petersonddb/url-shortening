@@ -36,3 +36,24 @@ jobs:
       - name: Run Linter
         working-directory: ${{ env.WORKING_DIR }}
         run: make lint
+
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.WORKING_DIR }}/go.mod
+          cache-dependency-path: ${{ env.WORKING_DIR }}/go.sum
+
+      - name: Install Dependencies
+        working-directory: ${{ env.WORKING_DIR }}
+        run: go mod download
+
+      - name: Run Tests
+        working-directory: ${{ env.WORKING_DIR }}
+        run: go test ./...

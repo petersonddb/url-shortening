@@ -43,7 +43,7 @@ jobs:
         image: mongodb/mongodb-community-server:6.0-ubi8
         ports:
           - "27017:27017"
-        environment:
+        env:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: pass
 

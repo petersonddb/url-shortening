@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: ${{ env.WORKING_DIR }}/go.mod
-          cache: ${{ env.WORKING_DIR }}/go.sum
+          cache-dependency-path: ${{ env.WORKING_DIR }}/go.sum
 
       - name: Install Tools
         working-directory: ${{ env.WORKING_DIR }}

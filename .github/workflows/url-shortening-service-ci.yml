@@ -72,6 +72,6 @@ jobs:
           MONGODB_SERVER: mongodb://root:pass@localhost:27017
           MONGODB_DB: testing
           KEYGEN_SERVICE_URL: localhost:8080
-          JWT_SECRET: very-secret
+          JWT_SECRET: c0235ba11b1770a18a3c6641622af9220e075c2add05277a953c322f79e122c1591eb9c8211c8ade56305911d6087dfb9fdbf7b7eb50de8f76589be52b627620
           BASE_REDIRECTION_URL: https://testing.run
         run: lerna run test

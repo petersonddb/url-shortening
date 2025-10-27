@@ -56,9 +56,7 @@ jobs:
           VALKEY_EXTRA_FLAGS: "--save ''" # optimized for testing, data will always be flushed by tests
 
       keygen-service:
-        build:
-          context: ${{ env.KEYGEN_SERVICE_DIR }}
-          dockerfile: Dockerfile
+        image: ${{ env.KEYGEN_SERVICE_DIR }}/Dockerfile
         ports:
           - "8080:8080"
 

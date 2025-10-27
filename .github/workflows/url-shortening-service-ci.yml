@@ -9,6 +9,7 @@ on:
 
 env:
   WORKING_DIR: url-shortening-service
+  KEYGEN_SERVICE_DIR: keygen-service
   NODE_VERSION: 24.6
 
 
@@ -47,6 +48,20 @@ jobs:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: pass
 
+      keys-db:
+        image: valkey/valkey:8.1.1 # for open-source Redis
+        ports:
+          - "6379:6379"
+        env:
+          VALKEY_EXTRA_FLAGS: "--save ''" # optimized for testing, data will always be flushed by tests
+
+      keygen-service:
+        build:
+          context: ${{ env.KEYGEN_SERVICE_DIR }}
+          dockerfile: Dockerfile
+        ports:
+          - "8080:8080"
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -67,6 +82,7 @@ jobs:
         env:
           MONGODB_SERVER: mongodb://root:pass@localhost:27017
           MONGODB_DB: testing
+          KEYGEN_SERVICE_URL: localhost:8080
           JWT_SECRET: very-secret
           BASE_REDIRECTION_URL: https://testing.run
         run: lerna run test

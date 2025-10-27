@@ -3,6 +3,7 @@ package keys
 import (
 	"context"
 	"fmt"
+	"os"
 	"keygen-service/app"
 	"keygen-service/databases"
 	"slices"

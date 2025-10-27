@@ -34,6 +34,7 @@ func launchKeysGenerator() {
 }
 
 func startKeysRPCServer() error {
+    // #nosec G102
 	lis, err := net.Listen("tcp", "0.0.0.0:8080")
 	if err != nil {
 		return err

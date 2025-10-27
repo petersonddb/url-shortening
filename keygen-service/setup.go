@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"keygen-service/app"
 	"keygen-service/databases"
 	"keygen-service/keys"
@@ -24,7 +25,7 @@ func Initialize() error {
 
 func setKeyValueDB(configuration *app.Configuration) {
 	configuration.KeyValueDb = &app.KeyValueDb{
-		Host:   "localhost",
+		Host:   os.Getenv("VALKEY_DATABASE_HOST"),
 		Port:   6379,
 		Client: &databases.ValkeyClient{},
 		Keys:   &keys.Valkey{},

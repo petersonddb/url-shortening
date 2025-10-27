@@ -65,3 +65,5 @@ jobs:
       - name: Run Tests
         working-directory: ${{ env.WORKING_DIR }}
         run: go test ./...
+        env:
+          VALKEY_DATABASE_HOST: keys-db

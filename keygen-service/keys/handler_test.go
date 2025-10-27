@@ -13,7 +13,7 @@ import (
 func setUp() error {
 	appConfig := app.Configuration{
 		KeyValueDb: &app.KeyValueDb{
-			Host:   "localhost",
+			Host:   os.Getenv("VALKEY_DATABASE_HOST"),
 			Port:   6380,
 			Client: &databases.ValkeyClient{},
 			Keys:   &Valkey{},

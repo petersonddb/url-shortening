@@ -40,6 +40,16 @@ services:
       VALKEY_EXTRA_FLAGS: "--save ''" # optimized for testing, data will always be flushed by tests
     restart: unless-stopped
 
+  keygen-service-local:
+    depends_on:
+      - keys-db
+    build:
+      context: keygen-service
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      VALKEY_DATABASE_HOST: keys-db
 
 volumes:
   resources-cleaner-messaging-broker-data:

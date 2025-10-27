@@ -48,18 +48,6 @@ jobs:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: pass
 
-      keys-db:
-        image: valkey/valkey:8.1.1 # for open-source Redis
-        ports:
-          - "6379:6379"
-        env:
-          VALKEY_EXTRA_FLAGS: "--save ''" # optimized for testing, data will always be flushed by tests
-
-      keygen-service:
-        image: ${{ env.KEYGEN_SERVICE_DIR }}/Dockerfile
-        ports:
-          - "8080:8080"
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -70,6 +58,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: ${{ env.WORKING_DIR }}/package-lock.json
+
+      - name: Start Local Keygen Service
+        run: docker compose up -d keygen-service-local
 
       - name: Install Dependencies
         working-directory: ${{ env.WORKING_DIR }}

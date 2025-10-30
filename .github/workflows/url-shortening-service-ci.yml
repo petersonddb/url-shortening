@@ -75,3 +75,28 @@ jobs:
           JWT_SECRET: ${{ secrets.JwtSecret }}
           BASE_REDIRECTION_URL: https://testing.run
         run: lerna run test
+
+  pages-build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.WORKING_DIR }}/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: ${{ env.WORKING_DIR }}
+        run: npm ci
+
+      - name: Run Build
+        working-directory: ${{ env.WORKING_DIR }}
+        env:
+          VITE_API_URL: http://localhost:3000
+          VITE_SETTINGS_REQUEST_URL: https://github.com/petersonddb/url-shortening/issues/new
+        run: lerna run --scope url-shortening-pages build

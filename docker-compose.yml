@@ -51,6 +51,18 @@ services:
     environment:
       VALKEY_DATABASE_HOST: keys-db
 
+  service-local:
+    depends_on:
+      - keygen-service-local
+      - app-db
+    build:
+      context: url-shortening-service/packages/url-shortening-service
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - url-shortening-service/packages/url-shortening-service/.env.docker
+
 volumes:
   resources-cleaner-messaging-broker-data:
   app-db-data:

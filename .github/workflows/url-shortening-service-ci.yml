@@ -127,7 +127,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          file: ${{ env.WORKING_DIR }}/url-shortening-service/Dockerfile
+          file: ${{ env.WORKING_DIR }}/packages/url-shortening-service/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           annotations: ${{ steps.meta.outputs.annotations }}

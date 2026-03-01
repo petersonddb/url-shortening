@@ -1,0 +1,20 @@
+#shorts section {
+    margin-top: 20px;
+}
+
+#shorts table {
+    display: block;
+    border: black solid 1px;
+    border-radius: 8px;
+}
+
+#shorts #form .h-fields {
+    display: flex;
+    align-items: center;
+}
+
+#shorts #form .error {
+    background: palevioletred;
+    padding: 4px;
+    border-radius: 8px;
+}

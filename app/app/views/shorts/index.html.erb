@@ -1,0 +1,30 @@
+<h1><%= t("title") %></h1>
+<hr>
+<h2><%= t(".title") %> </h2>
+
+<div id="shorts">
+  <section id="new"><%= render "form", short: @short %></section>
+
+  <section id="list">
+    <table>
+      <thead>
+      <tr>
+        <th><%= Short.human_attribute_name("token").capitalize %></th>
+        <th><%= Short.human_attribute_name("original_url").capitalize %></th>
+        <th><%= Short.human_attribute_name("expire_at").capitalize %></th>
+        <th><%= t(".actions.title") %></th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @shorts.each do |short| %>
+        <tr>
+          <td><%= short.token %></td>
+          <td><%= short.original_url %></td>
+          <td><%= short.expire_at %></td>
+          <td><%= button_to t(".actions.delete"), short, method: :delete, data: { turbo_confirm: "Are You Sure?" } %></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </section>
+</div>

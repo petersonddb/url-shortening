@@ -1,0 +1,21 @@
+pt-BR:
+  title: "Encurtador de URLs"
+  shorts:
+    index:
+      title: "Minhas URLs Encurtadas"
+      actions:
+        title: "Actions"
+        delete: "Apagar"
+  errors:
+    messages:
+      blank: "é obrigatório"
+  activerecord:
+    models:
+      short:
+        one: "URL Encurtada"
+        other: "URLs Encurtadas"
+    attributes:
+      short:
+        original_url: "URL Original"
+        token: "token"
+        expire_at: "Data de Expiração"

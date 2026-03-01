@@ -1,0 +1,12 @@
+<%= form_with model: short, id: "form" do |form| %>
+  <div class="h-fields">
+    <%= form.label :original_url %>
+    <%= form.text_field :original_url, class: "expanded" %>
+
+    <%= form.submit %>
+  </div>
+
+  <% if form.object.errors.any? %>
+    <p class="error"><%= form.object.errors.full_messages.join("; ") %></p>
+  <% end %>
+<% end %>

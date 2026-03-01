@@ -1,6 +1,6 @@
 services:
   resources-cleaner-messaging-broker:
-    image: rabbitmq:4.1-management  # includes web UI
+    image: rabbitmq:4.1-management # includes web UI
     ports:
       - "5672:5672"
       - "15672:15672" # Web UI
@@ -11,15 +11,26 @@ services:
       - resources-cleaner-messaging-broker-data:/var/lib/rabbitmq
     restart: unless-stopped
 
+  # app-db:
+  #   image: mongodb/mongodb-community-server:6.0-ubi8
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: example
+  #   volumes:
+  #     - app-db-data:/data/db
+  #   restart: unless-stopped
+
   app-db:
-    image: mongodb/mongodb-community-server:6.0-ubi8
+    image: postgres:18.1-bookworm
     ports:
-      - "27017:27017"
+      - "5432:5432"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
-      - app-db-data:/data/db
+      - app-db-data:/var/lib/postgresql
     restart: unless-stopped
 
   keys-db:

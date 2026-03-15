@@ -5,13 +5,13 @@ class ShortsController < ApplicationController
   end
 
   def create
-    result = Shorts::CreateService.call(**short_params.to_h.symbolize_keys)
+    @short_form = Shorts::CreateForm.new(**short_params.to_h.symbolize_keys)
 
-    if result.success?
+    if @short_form.save
       redirect_to(shorts_path)
     else
       @shorts = Short.all
-      @short = result.errors[:validation]
+      @short = @short_form.extract
 
       render(:index, status: :unprocessable_entity)
     end

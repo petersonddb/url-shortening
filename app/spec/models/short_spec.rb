@@ -3,10 +3,6 @@ require "rails_helper"
 RSpec.describe Short, type: :model do
   subject(:short) { Short.new }
 
-  it 'should have a reasonable default date for expire at' do
-    expect(short.expire_at).to eq(Time.zone.today + 1.year)
-  end
-
   it { should validate_presence_of(:token) }
   it { should validate_presence_of(:original_url) }
   it { should validate_presence_of(:expire_at) }

@@ -1,30 +1,37 @@
 # frozen_string_literal: true
 
-# Shorts::CreateForm using given originalUrl preparing with
+# Shorts::CreateForm using given original_url preparing with
 # the token to be used in the short link
 class Shorts::CreateForm
   include ActiveModel::Model
 
-  attr_accessor :original_url
+  delegate :original_url, to: :short
 
   validate :validate_short
 
   def initialize(original_url: nil)
     @short = Short.new(original_url: original_url)
+
+    # TODO: move defaults to another step, we should not allocate a token before actual form submit
+    set_defaults
   end
 
   def save
-    @short.token = "123456"
-    @short.expire_at = Time.zone.today + 1.year
-
-    return unless valid?
+    return false unless valid?
 
     @short.save
   end
 
-  def extract = @short
-
   private
+
+  attr_accessor :short
+
+  def set_defaults
+    # TODO: use real token from a token service
+    @short.token = "123456"
+
+    @short.expire_at = Time.zone.today + 1.year
+  end
 
   def validate_short
     unless @short.valid?

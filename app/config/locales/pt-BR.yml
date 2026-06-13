@@ -4,6 +4,8 @@ pt-BR:
     index:
       title: "Minhas URLs Encurtadas"
       actions:
+        messages:
+          confirm_delete: "Tem certeza que deseja excluir esta URL?"
         title: "Actions"
         delete: "Apagar"
   errors:

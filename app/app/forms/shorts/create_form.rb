@@ -11,12 +11,10 @@ class Shorts::CreateForm
 
   def initialize(original_url: nil)
     @short = Short.new(original_url: original_url)
-
-    # TODO: move defaults to another step, we should not allocate a token before actual form submit
-    set_defaults
   end
 
   def save
+    set_defaults
     return false unless valid?
 
     @short.save

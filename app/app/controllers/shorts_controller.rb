@@ -7,7 +7,7 @@ class ShortsController < ApplicationController
   end
 
   def create
-    @short_form = Shorts::CreateForm.new(**short_params.to_h.symbolize_keys)
+    @short_form = Shorts::CreateForm.new(original_url: short_params[:original_url])
 
     if @short_form.save
       redirect_to(shorts_path)

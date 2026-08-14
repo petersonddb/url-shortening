@@ -5,11 +5,14 @@
 class Shorts::CreateForm
   include ActiveModel::Model
 
-  delegate :original_url, to: :short
+  attr_reader :original_url
 
   validate :validate_short
+  validates :original_url, long_url: true, allow_blank: true
 
   def initialize(original_url: nil)
+    @original_url = original_url
+
     @short = Short.new(original_url: original_url)
   end
 
@@ -21,8 +24,6 @@ class Shorts::CreateForm
   end
 
   private
-
-  attr_accessor :short
 
   def set_defaults
     # TODO: use real token from a token service

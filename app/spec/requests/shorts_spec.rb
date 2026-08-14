@@ -38,7 +38,19 @@ RSpec.describe "Shorts Pages", type: :request do
       end
     end
 
-    context "with NOT valid params" do
+    context "with NOT valid params having NO original url" do
+      let(:params) { { short: { original_url: nil } } }
+
+      it "indicates validation errors" do
+        make_request
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.content_type).to match(/html/i)
+        expect(response.body).to include("Original url is required")
+      end
+    end
+
+    context "with NOT valid params having invalid original url" do
       let(:params) { { short: { original_url: "invalid-url" } } }
 
       it "indicates validation errors" do

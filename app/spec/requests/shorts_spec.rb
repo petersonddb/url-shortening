@@ -1,8 +1,18 @@
 require "rails_helper"
 
 RSpec.describe "Shorts Pages", type: :request do
+  describe "locale resolution" do
+    describe "GET /shorts" do
+      subject(:make_request) { get("/shorts", headers: headers) }
+
+      it_behaves_like("locale resolution")
+    end
+  end
+
   describe "GET /shorts" do
-    subject(:make_request) { get("/shorts") }
+    subject(:make_request) { get("/shorts", headers: headers) }
+
+    let(:headers) { {} }
 
     before do
       Shorts::CreateForm.new(original_url: 'https://test.example.com/long').save

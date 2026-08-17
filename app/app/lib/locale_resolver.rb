@@ -1,27 +1,24 @@
 # frozen_string_literal: true
 
-# Resolves the locale to use for a request, preferring an explicit cookie
-# value over the Accept-Language header, and falling back to the app default.
+# Resolves the locale to use for a request from the Accept-Language header,
+# falling back to the app default when no supported language is requested.
 class LocaleResolver
   def self.resolve(...)
     new(...).resolve
   end
 
-  def initialize(cookie_locale:, accept_language_header:)
-    @cookie_locale = cookie_locale
+  def initialize(accept_language_header:)
     @accept_language_header = accept_language_header
   end
 
   # Always returns an available locale String.
   def resolve
-    available_locale(cookie_locale) ||
-      accept_language_locale ||
-      I18n.default_locale.to_s
+    accept_language_locale || I18n.default_locale.to_s
   end
 
   private
 
-  attr_reader :cookie_locale, :accept_language_header
+  attr_reader :accept_language_header
 
   # Returns the best available locale String matched from the Accept-Language
   # header, or nil when none of the requested languages are supported.
@@ -41,8 +38,8 @@ class LocaleResolver
     end.sort_by { |_, quality| -quality }.map(&:first)
   end
 
-  # Matches a candidate (e.g. a cookie value or "pt-BR") against the available
-  # locales, falling back to a language-only match (e.g. "pt" -> "pt-BR").
+  # Matches a candidate (e.g. "pt-BR") against the available locales, falling
+  # back to a language-only match (e.g. "pt" -> "pt-BR").
   # Returns an available locale String, or nil when there's no match.
   def available_locale(candidate)
     return if candidate.blank?

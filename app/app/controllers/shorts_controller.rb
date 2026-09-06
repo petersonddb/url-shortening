@@ -1,17 +1,18 @@
+# frozen_string_literal: true
+
 class ShortsController < ApplicationController
   def index
-    @short = Short.new
+    @short_form = Shorts::CreateForm.new
     @shorts = Short.all
   end
 
   def create
-    result = Shorts::CreateService.call(**short_params.to_h.symbolize_keys)
+    @short_form = Shorts::CreateForm.new(original_url: short_params[:original_url])
 
-    if result.success?
+    if @short_form.save
       redirect_to(shorts_path)
     else
       @shorts = Short.all
-      @short = result.errors[:validation]
 
       render(:index, status: :unprocessable_entity)
     end
@@ -19,7 +20,8 @@ class ShortsController < ApplicationController
 
   def destroy
     @short = Short.find(params[:id])
-    @short.destroy
+    # TODO: do not destroy the short this way, we will lose the token forever
+    @short.destroy!
 
     redirect_to shorts_path
   end

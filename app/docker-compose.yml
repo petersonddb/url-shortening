@@ -1,0 +1,25 @@
+services:
+  app-db:
+    image: postgres:18.1-bookworm
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - app-db-data:/var/lib/postgresql
+    restart: unless-stopped
+
+  token-repository:
+    image: valkey/valkey:8.1.1 # for open-source Redis
+    ports:
+      - "6379:6379"
+    environment:
+      VALKEY_EXTRA_FLAGS: "--appendonly yes --appendfsync everysec" # optimized for consistency, avoid duplicates
+    volumes:
+      - token-repository-data:/data
+    restart: unless-stopped
+
+volumes:
+  app-db-data:
+  token-repository-data:

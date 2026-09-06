@@ -40,6 +40,15 @@ en:
   errors:
     messages:
       blank: "is required"
+  helpers:
+    submit:
+      create: "Create %{model}"
+  activemodel:
+    models:
+      shorts/create_form: "short"
+    attributes:
+      shorts/create_form:
+        original_url: "original URL"
   activerecord:
     models:
       short:

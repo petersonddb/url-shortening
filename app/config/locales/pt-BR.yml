@@ -6,11 +6,21 @@ pt-BR:
       actions:
         messages:
           confirm_delete: "Tem certeza que deseja excluir esta URL?"
-        title: "Actions"
+        title: "Ações"
         delete: "Apagar"
   errors:
     messages:
       blank: "é obrigatório"
+      invalid: "é inválido"
+  helpers:
+    submit:
+      create: "Criar %{model}"
+  activemodel:
+    models:
+      shorts/create_form: "URL Encurtada"
+    attributes:
+      shorts/create_form:
+        original_url: "URL Original"
   activerecord:
     models:
       short:
@@ -20,4 +30,4 @@ pt-BR:
       short:
         original_url: "URL Original"
         token: "token"
-        expire_at: "Data de Expiração"
+        expire_at: "data de expiração"

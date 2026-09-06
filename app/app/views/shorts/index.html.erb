@@ -3,7 +3,7 @@
 <h2><%= t(".title") %> </h2>
 
 <div id="shorts">
-  <section id="new"><%= render "form", short: @short %></section>
+  <section id="new"><%= render "form", short_form: @short_form %></section>
 
   <section id="list">
     <table>
@@ -21,7 +21,7 @@
           <td><%= short.token %></td>
           <td><%= short.original_url %></td>
           <td><%= short.expire_at %></td>
-          <td><%= button_to t(".actions.delete"), short, method: :delete, data: { turbo_confirm: "Are You Sure?" } %></td>
+          <td><%= button_to t(".actions.delete"), short, method: :delete, data: { turbo_confirm: t('.actions.messages.confirm_delete') } %></td>
         </tr>
       <% end %>
       </tbody>

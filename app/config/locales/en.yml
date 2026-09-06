@@ -33,11 +33,22 @@ en:
     index:
       title: "Shorts"
       actions:
+        messages:
+          confirm_delete: "Are you sure?"
         title: "Actions"
         delete: "Delete"
   errors:
     messages:
       blank: "is required"
+  helpers:
+    submit:
+      create: "Create %{model}"
+  activemodel:
+    models:
+      shorts/create_form: "short"
+    attributes:
+      shorts/create_form:
+        original_url: "original URL"
   activerecord:
     models:
       short:

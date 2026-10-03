@@ -1,0 +1,3 @@
+:concurrency: 5
+:queues:
+  - [token_generation, 1]

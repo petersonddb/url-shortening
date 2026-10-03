@@ -1,0 +1,4 @@
+token_generation:
+  cron: "* * * * * *"
+  class: "TokenGenerationJob"
+  queue: token_generation

@@ -26,5 +26,9 @@ module App
 
     config.i18n.available_locales = %i[en pt-BR]
     config.i18n.default_locale = :en
+    config.autoload_paths << Rails.root.join("app/repositories")
+    config.eager_load_paths << Rails.root.join("app/repositories")
+    config.autoload_paths << Rails.root.join("app/workers/sidekiq")
+    config.eager_load_paths << Rails.root.join("app/workers/sidekiq")
   end
 end

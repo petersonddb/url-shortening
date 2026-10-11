@@ -31,4 +31,3 @@ RSpec.shared_examples "locale resolution" do
     end
   end
 end
-

@@ -1,33 +1,29 @@
 require "rails_helper"
 
 RSpec.describe "Shorts Pages", type: :request do
-  describe "locale resolution" do
-    describe "GET /shorts" do
-      subject(:make_request) { get("/shorts", headers: headers) }
-
-      it_behaves_like("locale resolution")
-    end
-  end
-
   describe "GET /shorts" do
     subject(:make_request) { get("/shorts", headers: headers) }
 
-    let(:headers) { {} }
+    it_behaves_like("locale resolution")
 
-    before do
-      Shorts::CreateForm.new(original_url: 'https://test.example.com/long').save
-      Shorts::CreateForm.new(original_url: 'https://test.example.com/very-long').save
-    end
+    context "when shorts exist" do
+      let(:headers) { {} }
 
-    it "lists existent shorts" do
-      make_request
+      before do
+        Shorts::CreateForm.new(original_url: "https://test.example.com/long").save
+        Shorts::CreateForm.new(original_url: "https://test.example.com/very-long").save
+      end
 
-      expect(response).to have_http_status(:ok)
-      expect(response.content_type).to match(/html/i)
-      expect(response.body).to include(
-        "https://test.example.com/long",
-        "https://test.example.com/very-long"
-      )
+      it "lists existent shorts" do
+        make_request
+
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to match(/html/i)
+        expect(response.body).to include(
+          "https://test.example.com/long",
+          "https://test.example.com/very-long"
+        )
+      end
     end
   end
 
@@ -48,7 +44,7 @@ RSpec.describe "Shorts Pages", type: :request do
       end
     end
 
-    context "with NOT valid params having NO original url" do
+    context "with no original url" do
       let(:params) { { short: { original_url: nil } } }
 
       it "indicates validation errors" do
@@ -56,11 +52,11 @@ RSpec.describe "Shorts Pages", type: :request do
 
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(/html/i)
-        expect(response.body).to include("Original url is required")
+        expect(response.body).to include("original URL is required")
       end
     end
 
-    context "with NOT valid params having invalid original url" do
+    context "with an invalid original url" do
       let(:params) { { short: { original_url: "invalid-url" } } }
 
       it "indicates validation errors" do
@@ -68,7 +64,7 @@ RSpec.describe "Shorts Pages", type: :request do
 
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(/html/i)
-        expect(response.body).to include("Original url is invalid")
+        expect(response.body).to include("original URL is invalid")
       end
     end
   end

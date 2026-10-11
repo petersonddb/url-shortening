@@ -19,7 +19,7 @@ class ShortsController < ApplicationController
   rescue Shorts::CreateForm::TokenUnavailable => error
     Rails.logger.error(error.message)
 
-    head :internal_server_error
+    raise
   end
 
   def destroy

@@ -61,11 +61,9 @@ RSpec.describe "Shorts Pages", type: :request do
         allow(Rails.logger).to receive(:error)
       end
 
-      it "logs the shortage and returns 500 without creating a short" do
-        make_request
+      it "logs and reraises the shortage without creating a short" do
+        expect { make_request }.to raise_error(Shorts::CreateForm::TokenUnavailable, /no token/i)
 
-        expect(response).to have_http_status(:internal_server_error)
-        expect(response.body).to be_empty
         expect(Rails.logger).to have_received(:error).with(/no token/i)
 
         get("/shorts")

@@ -2,7 +2,8 @@
 
 class Redis
   class TokenRepository
-    KEY = "token_repository:available"
+    AVAILABLE_KEY = "token_repository:available"
+    UNAVAILABLE_KEY = "token_repository:unavailable"
 
     def self.default_client
       @default_client ||= ::Redis.new(url: redis_url)
@@ -17,7 +18,28 @@ class Redis
     end
 
     def store(token)
-      @client.sadd(KEY, token)
+      loop do
+        result = @client.watch(UNAVAILABLE_KEY) do
+          if @client.sismember(UNAVAILABLE_KEY, token)
+            @client.unwatch
+            false
+          else
+            @client.multi { |transaction| transaction.sadd(AVAILABLE_KEY, token) }
+          end
+        end
+
+        return false if result == false
+        return result.first == 1 if result
+      end
+    end
+
+    def allocate
+      loop do
+        token = @client.srandmember(AVAILABLE_KEY)
+        return nil unless token
+
+        return token if @client.smove(AVAILABLE_KEY, UNAVAILABLE_KEY, token)
+      end
     end
   end
 end

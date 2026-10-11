@@ -8,10 +8,12 @@ RSpec.describe "Shorts Pages", type: :request do
 
     context "when shorts exist" do
       let(:headers) { {} }
+      let(:repository) { instance_double(Redis::TokenRepository) }
 
       before do
-        Shorts::CreateForm.new(original_url: "https://test.example.com/long").save
-        Shorts::CreateForm.new(original_url: "https://test.example.com/very-long").save
+        allow(repository).to receive(:allocate).and_return("ABC123", "DEF456")
+        Shorts::CreateForm.new(original_url: "https://test.example.com/long", repository:).save
+        Shorts::CreateForm.new(original_url: "https://test.example.com/very-long", repository:).save
       end
 
       it "lists existent shorts" do
@@ -32,6 +34,11 @@ RSpec.describe "Shorts Pages", type: :request do
 
     context "with valid params" do
       let(:params) { { short: { original_url: "https://test.example.com/new-long" } } }
+      let(:repository) { instance_double(Redis::TokenRepository, allocate: "ABC123") }
+
+      before do
+        allow(Redis::TokenRepository).to receive(:new).and_return(repository)
+      end
 
       it "indicates the new short has been created" do
         make_request
@@ -41,6 +48,28 @@ RSpec.describe "Shorts Pages", type: :request do
 
         expect(response.content_type).to match(/html/i)
         expect(response.body).to include("https://test.example.com/new-long")
+        expect(response.body).to include("ABC123")
+      end
+    end
+
+    context "when no token is available" do
+      let(:params) { { short: { original_url: "https://test.example.com/new-long" } } }
+      let(:repository) { instance_double(Redis::TokenRepository, allocate: nil) }
+
+      before do
+        allow(Redis::TokenRepository).to receive(:new).and_return(repository)
+        allow(Rails.logger).to receive(:error)
+      end
+
+      it "logs and reraises the shortage without creating a short" do
+        expect { make_request }.to raise_error(Shorts::CreateForm::TokenUnavailable, /no token/i)
+
+        expect(Rails.logger).to have_received(:error).with(/no token/i)
+
+        get("/shorts")
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include("https://test.example.com/new-long")
       end
     end
 

@@ -11,3 +11,4 @@ These rules apply to specs under this directory.
 - For one-line specs, such as Shoulda Matchers specs, use a separate `it` example for each expectation.
 - In multi-line `it` examples, invoke the subject in a separate statement before the expectations. Capture its return value when needed, then assert against that value. Do not trigger the subject through the first expectation in a sequence.
 - Invoke the subject only once per `it` example. Reuse the captured result or inspect the effects of that invocation for subsequent expectations. One-line matcher specs may use their usual implicit subject syntax.
+- In request specs, exercise the behavior under test through HTTP requests and verify user-facing outcomes through HTTP responses. Scenario setup may use models, forms, services, factories, or stubs directly; do not inspect models to assert the result of a request (for example, `Short.last` or `Short.count`).

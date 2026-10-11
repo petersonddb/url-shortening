@@ -2,12 +2,12 @@
 
 class ShortsController < ApplicationController
   def index
-    @short_form = Shorts::CreateForm.new
+    @short_form = Shorts::CreateForm.new(original_url: nil, repository: token_repository)
     @shorts = Short.all
   end
 
   def create
-    @short_form = Shorts::CreateForm.new(original_url: short_params[:original_url])
+    @short_form = Shorts::CreateForm.new(original_url: short_params[:original_url], repository: token_repository)
 
     if @short_form.save
       redirect_to(shorts_path)
@@ -16,6 +16,10 @@ class ShortsController < ApplicationController
 
       render(:index, status: :unprocessable_entity)
     end
+  rescue Shorts::CreateForm::TokenUnavailable => error
+    Rails.logger.error(error.message)
+
+    raise
   end
 
   def destroy
@@ -27,6 +31,10 @@ class ShortsController < ApplicationController
   end
 
   private
+
+  def token_repository
+    Redis::TokenRepository.new
+  end
 
   def short_params
     params.expect(short: [ :original_url ])

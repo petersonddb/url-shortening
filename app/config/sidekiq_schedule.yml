@@ -1,4 +1,4 @@
 token_generation:
   cron: "* * * * * *"
-  class: "TokenGenerationJob"
+  class: "Shortener::TokenGenerationJob"
   queue: token_generation

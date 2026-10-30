@@ -1,10 +1,10 @@
 require "rails_helper"
 
-RSpec.describe Tokens::Generator do
+RSpec.describe Shortener::TokenGenerator do
   describe "#generate" do
     subject(:generate) { described_class.new(repository:).generate }
 
-    let(:repository) { instance_double(Redis::TokenRepository) }
+    let(:repository) { instance_double(Shortener::Redis::TokenRepository) }
 
     before do
       allow(SecureRandom).to receive(:random_bytes).with(6).and_return("\xFF\xFF\xFF\xFF\xFF\xFF".b)

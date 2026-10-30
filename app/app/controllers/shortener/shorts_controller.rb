@@ -1,29 +1,29 @@
 # frozen_string_literal: true
 
-class ShortsController < ApplicationController
+class Shortener::ShortsController < ApplicationController
   def index
-    @short_form = Shorts::CreateForm.new(original_url: nil, repository: token_repository)
-    @shorts = Short.all
+    @short_form = Shortener::CreateShortForm.new(original_url: nil, repository: token_repository)
+    @shorts = Shortener::Short.all
   end
 
   def create
-    @short_form = Shorts::CreateForm.new(original_url: short_params[:original_url], repository: token_repository)
+    @short_form = Shortener::CreateShortForm.new(original_url: short_params[:original_url], repository: token_repository)
 
     if @short_form.save
       redirect_to(shorts_path)
     else
-      @shorts = Short.all
+      @shorts = Shortener::Short.all
 
       render(:index, status: :unprocessable_entity)
     end
-  rescue Shorts::CreateForm::TokenUnavailable => error
+  rescue Shortener::CreateShortForm::TokenUnavailable => error
     Rails.logger.error(error.message)
 
     raise
   end
 
   def destroy
-    @short = Short.find(params[:id])
+    @short = Shortener::Short.find(params[:id])
     # TODO: do not destroy the short this way, we will lose the token forever
     @short.destroy!
 
@@ -33,7 +33,7 @@ class ShortsController < ApplicationController
   private
 
   def token_repository
-    Redis::TokenRepository.new
+    Shortener::Redis::TokenRepository.new
   end
 
   def short_params

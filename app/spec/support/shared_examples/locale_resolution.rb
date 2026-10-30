@@ -17,7 +17,7 @@ RSpec.shared_examples "locale resolution" do
     it "renders default" do
       make_request
 
-      expect(response.body).to match(/shorter/i)
+      expect(response.body).to match(/shortener/i)
     end
   end
 
@@ -27,7 +27,7 @@ RSpec.shared_examples "locale resolution" do
     it "renders default" do
       make_request
 
-      expect(response.body).to match(/shorter/i)
+      expect(response.body).to match(/shortener/i)
     end
   end
 end

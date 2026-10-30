@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# Shorts::CreateForm using given original_url preparing with
+# Shortener::CreateShortForm using given original url preparing with
 # the token to be used in the short link
-class Shorts::CreateForm
+class Shortener::CreateShortForm
   include ActiveModel::Model
 
   class TokenUnavailable < StandardError; end
@@ -16,7 +16,7 @@ class Shorts::CreateForm
     @original_url = original_url
     @repository = repository
 
-    @short = Short.new(original_url:)
+    @short = Shortener::Short.new(original_url:)
   end
 
   def save

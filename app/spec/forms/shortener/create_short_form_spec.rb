@@ -1,10 +1,10 @@
 require "rails_helper"
 
-RSpec.describe Shorts::CreateForm do
+RSpec.describe Shortener::CreateShortForm do
   describe "#save" do
     subject(:save) { form.save }
 
-    let(:repository) { instance_double(Redis::TokenRepository) }
+    let(:repository) { instance_double(Shortener::Redis::TokenRepository) }
     let(:form) { described_class.new(original_url:, repository:) }
 
     context "with a valid URL and an available token" do
@@ -19,8 +19,8 @@ RSpec.describe Shorts::CreateForm do
 
         expect(saved).to be(true)
         expect(repository).to have_received(:allocate).once
-        expect(Short.last.token).to eq("ABC123")
-        expect(Short.last.expire_at).to eq(Time.zone.today + 1.year)
+        expect(Shortener::Short.last.token).to eq("ABC123")
+        expect(Shortener::Short.last.expire_at).to eq(Time.zone.today + 1.year)
       end
     end
 
@@ -36,7 +36,7 @@ RSpec.describe Shorts::CreateForm do
 
         expect(saved).to be(false)
         expect(repository).not_to have_received(:allocate)
-        expect(Short.count).to eq(0)
+        expect(Shortener::Short.count).to eq(0)
       end
     end
 
@@ -51,7 +51,7 @@ RSpec.describe Shorts::CreateForm do
         expect { save }.to raise_error(described_class::TokenUnavailable, /no token/i)
 
         expect(form.errors).to be_empty
-        expect(Short.count).to eq(0)
+        expect(Shortener::Short.count).to eq(0)
       end
     end
   end

@@ -34,7 +34,7 @@ class LocaleResolver
       language, quality = part.strip.split(";q=")
       next if language.blank?
 
-      [language.strip.tr("_", "-"), (quality || "1").to_f]
+      [ language.strip.tr("_", "-"), (quality || "1").to_f ]
     end.sort_by { |_, quality| -quality }.map(&:first)
   end
 

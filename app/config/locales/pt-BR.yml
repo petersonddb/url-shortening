@@ -1,13 +1,14 @@
 pt-BR:
   title: "Encurtador de URLs"
-  shorts:
-    index:
-      title: "Minhas URLs Encurtadas"
-      actions:
-        messages:
-          confirm_delete: "Tem certeza que deseja excluir esta URL?"
-        title: "Ações"
-        delete: "Apagar"
+  shortener:
+    shorts:
+      index:
+        title: "Minhas URLs Encurtadas"
+        actions:
+          messages:
+            confirm_delete: "Tem certeza que deseja excluir esta URL?"
+          title: "Ações"
+          delete: "Apagar"
   errors:
     messages:
       blank: "é obrigatório"
@@ -17,17 +18,17 @@ pt-BR:
       create: "Criar %{model}"
   activemodel:
     models:
-      shorts/create_form: "URL Encurtada"
+      shortener/create_short_form: "URL Encurtada"
     attributes:
-      shorts/create_form:
+      shortener/create_short_form:
         original_url: "URL Original"
   activerecord:
     models:
-      short:
+      shortener/short:
         one: "URL Encurtada"
         other: "URLs Encurtadas"
     attributes:
-      short:
+      shortener/short:
         original_url: "URL Original"
         token: "token"
         expire_at: "data de expiração"

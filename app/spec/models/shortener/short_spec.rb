@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Short, type: :model do
+RSpec.describe Shortener::Short, type: :model do
   describe "validations" do
     it { should validate_presence_of(:token) }
     it { should validate_presence_of(:original_url) }

@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
-RSpec.describe Redis::TokenRepository do
+RSpec.describe Shortener::Redis::TokenRepository do
   describe "#store" do
     subject(:store) { repository.store(token) }
 
